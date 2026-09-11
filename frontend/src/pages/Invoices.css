@@ -1,0 +1,130 @@
+.invoices-container {
+  font-family: 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
+  background-color: #F1F5F9; /* Slate 100 App background */
+  padding: 32px;
+  min-height: 100vh;
+}
+
+.page-header {
+  margin-bottom: 24px; /* 8pt grid */
+}
+
+.page-header h1 {
+  color: #0F172A; /* Slate 900 Primary body text, Headings */
+  margin: 0 0 8px 0;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.page-header p {
+  color: #64748B; /* Slate 500 Secondary text */
+  margin: 0;
+  font-size: 16px;
+}
+
+.invoices-controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.search-input {
+  padding: 8px 16px;
+  border: 1px solid #64748B; /* Slate 500 */
+  border-radius: 4px;
+  font-size: 14px;
+  flex: 1;
+  max-width: 320px;
+  color: #0F172A; /* Slate 900 */
+}
+
+.filter-btn {
+  background-color: #FFFFFF;
+  color: #0F172A; /* Slate 900 */
+  border: 1px solid #64748B; /* Slate 500 */
+  padding: 8px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  background-color: #DBEAFE; /* Ice Blue */
+  color: #1E3A8A; /* Navy Blue */
+  border-color: #2563EB; /* Action Blue */
+}
+
+.invoices-list-container {
+  background-color: #FFFFFF;
+  border: 1px solid #F1F5F9; /* Slate 100 Card borders */
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.invoices-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoices-table th {
+  background-color: #1E3A8A; /* Navy Blue Headers */
+  color: #FFFFFF;
+  text-align: left;
+  padding: 16px 24px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.invoices-table td {
+  padding: 16px 24px;
+  border-bottom: 1px solid #F1F5F9; /* Slate 100 Card borders */
+  color: #0F172A; /* Slate 900 */
+  font-size: 14px;
+}
+
+.invoices-table tr:hover {
+  background-color: #DBEAFE; /* Ice Blue Selected/Hover table rows */
+}
+
+.empty-state {
+  text-align: center;
+  padding: 64px 24px !important;
+  color: #64748B !important; /* Slate 500 Secondary text */
+  background-color: #FFFFFF;
+  font-size: 16px;
+}
+
+/* Buttons (Included here for future use) */
+.action-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.view-btn {
+  background-color: #2563EB; /* Action Blue Primary buttons */
+  color: #FFFFFF;
+  margin-right: 8px;
+}
+
+.view-btn:hover {
+  background-color: #1E3A8A; /* Navy Blue */
+}
+
+.download-btn {
+  background-color: #FFFFFF;
+  color: #2563EB; /* Action Blue */
+  border: 1px solid #2563EB;
+}
+
+.download-btn:hover {
+  background-color: #DBEAFE; /* Ice Blue Hover states */
+}

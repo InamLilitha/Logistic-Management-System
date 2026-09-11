@@ -28,7 +28,7 @@ function App() {
     };
 
   return (
-    <LmsLayout activeTab={activeTab} setActiveTab={setActiveTab()}>
+    <LmsLayout activeTab={activeTab} setActiveTab={setActiveTab}>
         {renderContent()}
     </LmsLayout>
   );

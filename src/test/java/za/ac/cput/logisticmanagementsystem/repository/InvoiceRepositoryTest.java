@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 class InvoiceRepositoryTest {
 
     @Autowired
@@ -24,7 +24,6 @@ class InvoiceRepositoryTest {
     private static Invoice invoice = InvoiceFactory.buildInvoice(1000.0, "Pending", new Date());
 
     @Test
-    @Order(1)
     void createInvoice() {
         Invoice created = repository.save(invoice);
         assertNotNull(created);
@@ -33,7 +32,6 @@ class InvoiceRepositoryTest {
     }
 
     @Test
-    @Order(2)
     void readInvoice() {
         Invoice read = repository.findById(invoice.getInvoiceId()).orElse(null);
         assertNotNull(read);
@@ -42,7 +40,6 @@ class InvoiceRepositoryTest {
     }
 
     @Test
-    @Order(3)
     void updateInvoice() {
         Invoice updatedInvoice = new Invoice.Builder()
                 .invoiceId(invoice.getInvoiceId()) // Use existing ID
@@ -60,14 +57,12 @@ class InvoiceRepositoryTest {
     }
 
     @Test
-    @Order(4)
     void getAllInvoice() {
         assertFalse(repository.findAll().isEmpty());
         System.out.println("All invoices: " + repository.findAll());
     }
 
     @Test
-    @Order(5)
     void deleteInvoice() {
         repository.deleteById(invoice.getInvoiceId());
         assertFalse(repository.existsById(invoice.getInvoiceId()));

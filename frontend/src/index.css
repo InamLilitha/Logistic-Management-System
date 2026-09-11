@@ -4,7 +4,6 @@
  *Maghdie Petersen 230600204
  *  */
 @import "tailwindcss";
-@config "../tailwind.config.js";
 
 @layer base {
   body{

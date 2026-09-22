@@ -18,7 +18,7 @@ public class ShipmentService implements IShipmentService {
 
     @Override
     public Shipment create(Shipment request) {
-        Shipment shipment = ShipmentFactory.createShipment(request.getWeight(), request.getOrigin(), request.getDestination(), request.getDispatchDate(), request.getEstimatedDeliveryDate());
+        Shipment shipment = ShipmentFactory.createShipment(request.getWeight(), request.getOrigin(), request.getDestination(), request.getDispatchDate());
         return repository.save(shipment);
     }
 

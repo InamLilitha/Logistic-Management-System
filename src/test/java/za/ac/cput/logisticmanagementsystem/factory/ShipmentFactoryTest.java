@@ -16,11 +16,11 @@ public class ShipmentFactoryTest {
 
     @Test
     public void testCreateValidShipment() {
+        LocalDate dispatchDate = LocalDate.now();
         Shipment shipment = ShipmentFactory.createShipment(
                 450.0,
                 "Cape Town", "Johannesburg",
-                LocalDate.now(),
-                LocalDate.now().plusDays(3)
+                dispatchDate
         );
 
         assertNotNull(shipment);
@@ -29,8 +29,8 @@ public class ShipmentFactoryTest {
         assertEquals(450.0, shipment.getWeight());
         assertEquals("Cape Town", shipment.getOrigin());
         assertEquals("Johannesburg", shipment.getDestination());
-        assertEquals(LocalDate.now(), shipment.getDispatchDate());
-        assertEquals(LocalDate.now().plusDays(3), shipment.getEstimatedDeliveryDate());
+        assertEquals(dispatchDate, shipment.getDispatchDate());
+        assertEquals(dispatchDate.plusDays(3), shipment.getEstimatedDeliveryDate());
 
     }
 
@@ -42,9 +42,8 @@ public class ShipmentFactoryTest {
                 -45.0,
                 "Cape Town",
                 "Johannesburg",
-                LocalDate.now(),
-                LocalDate.now().plusDays(3))
-        );
+                        LocalDate.now()
+                ));
 
         assertEquals("Weight has to be greater than zero", exception.getMessage());
    }
@@ -55,8 +54,8 @@ public class ShipmentFactoryTest {
                 450.0,
                 "",
                 "Johannesburg",
-                LocalDate.now(),
-                LocalDate.now().plusDays(3))
+                LocalDate.now()
+        )
         );
 
         assertEquals("Origin has to be specified", exception.getMessage());
@@ -69,8 +68,7 @@ public class ShipmentFactoryTest {
                 450.0,
                 "Cape Town",
                 "",
-                LocalDate.now(),
-                LocalDate.now().plusDays(3))
+                LocalDate.now())
         );
 
         assertEquals("Destination has to be specified", exception.getMessage());
@@ -83,8 +81,7 @@ public class ShipmentFactoryTest {
                 450.0,
                 "Cape Town",
                 "Cape Town",
-                LocalDate.now(),
-                LocalDate.now().plusDays(3))
+                LocalDate.now())
         );
 
         assertEquals("Origin and destination cannot be the same", exception.getMessage());
@@ -97,38 +94,24 @@ public class ShipmentFactoryTest {
                 450.0,
                 "Cape Town",
                 "Johannesburg",
-                null,
-                LocalDate.now().plusDays(3))
+                null)
         );
 
         assertEquals("Dispatch date is required", exception.getMessage());
    }
 
    @Test
-   public void testCreateShipment_InvalidEstimatedDeliveryDate(){
-       IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-       ShipmentFactory.createShipment(
+    public void testEstimateDeliveryDateGeneratedAutomatically(){
+        LocalDate dispatchDate = LocalDate.of(2026, 7, 19);
+        Shipment shipment = ShipmentFactory.createShipment(
                 450.0,
                 "Cape Town",
                 "Johannesburg",
-                LocalDate.now(),
-                null)
-
+                dispatchDate
         );
+        assertEquals(LocalDate.of(2026, 7, 22),
+                shipment.getEstimatedDeliveryDate());
 
-        assertEquals("Estimated delivery date is required", exception.getMessage());
    }
 
-   @Test
-    public void testCreateShipment_DeliveryBeforeDispatch(){
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                ShipmentFactory.createShipment(
-                        450.0,
-                        "Cape Town",
-                        "Johannesburg",
-                        LocalDate.now(),
-                        LocalDate.now().minusDays(1))
-        );
-        assertEquals("Estimated delivery date cannot be before dispatch date", exception.getMessage());
-   }
 }//

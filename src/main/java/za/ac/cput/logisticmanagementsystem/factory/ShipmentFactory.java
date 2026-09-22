@@ -16,8 +16,7 @@ public class ShipmentFactory {
             double weight,
             String origin,
             String destination,
-            LocalDate dispatchDate,
-            LocalDate estimatedDeliveryDate) {
+            LocalDate dispatchDate) {
 
 
         if(weight <=0 ){
@@ -36,12 +35,8 @@ public class ShipmentFactory {
         if(dispatchDate == null) {
             throw new IllegalArgumentException("Dispatch date is required");
         }
-        if(estimatedDeliveryDate == null ) {
-            throw new IllegalArgumentException("Estimated delivery date is required");
-        }
-        if(estimatedDeliveryDate.isBefore(dispatchDate)) {
-            throw new IllegalArgumentException("Estimated delivery date cannot be before dispatch date");
-        }
+
+        LocalDate estimatedDeliveryDate = dispatchDate.plusDays(3);
 
 
         return new Shipment.Builder()

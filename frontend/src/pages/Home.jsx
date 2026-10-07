@@ -1,5 +1,7 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Truck, Package, Building2, FileText, Plus, Search, ArrowRight} from 'lucide-react';
+import {getAllShipments} from "../services/ShipmentService.js";
+import {getShipmentAnalytics} from "../services/ShipmentAnalytics.js";
 
 const Home = ({setActiveTab}) => {
   const modules = [
@@ -8,6 +10,27 @@ const Home = ({setActiveTab}) => {
     {id: 'companies', title: 'Companies', description: 'Manage partners, customers and suppliers.', icon: Building2},
     {id: 'invoices', title: 'Invoices', description: 'Review and manage shipment invoices.', icon: FileText},
   ];
+
+  const [shipments, setShipments] = useState([]);
+
+  useEffect(() => {
+    const loadShipments = async () => {
+      try {
+        const response = await getAllShipments();
+        setShipments(response.data);
+      } catch (error) {
+        console.error('Failed to load shipments:', error);
+      }
+    };
+
+    loadShipments();
+  }, []);
+
+  const {
+    totalShipments,
+    mostCommonRoute,
+    mostCommonRouteCount
+  } = getShipmentAnalytics(shipments);
 
   return (
     <div className="p-8 space-y-8">
@@ -29,7 +52,7 @@ const Home = ({setActiveTab}) => {
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('shipments')}
+            onClick={() => setActiveTab('tracking')}
             className="flex min-h-11 items-center gap-2 rounded-md bg-white px-5 font-semibold text-lms-navy"
           >
             <Search className="w-5 h-5" />
@@ -59,6 +82,40 @@ const Home = ({setActiveTab}) => {
             </button>
           );
         })}
+      </section>
+
+      <section className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+        <h2 className="mb-5 text-lg font-bold text-lms-textMain">
+          Shipment Overview
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <div>
+            <p className="text-sm font-semibold text-lms-textMuted">
+              Total Shipments
+            </p>
+
+            <p className="mt-2 text-3xl font-bold text-lms-navy">
+              {totalShipments}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm font-semibold text-lms-textMuted">
+              Most Common Route
+            </p>
+
+            <p className="mt-2 text-xl font-bold text-lms-navy">
+              {mostCommonRoute}
+            </p>
+
+            <p className="mt-1 text-sm text-lms-textMuted">
+              {mostCommonRouteCount} shipment{mostCommonRouteCount !== 1 ? 's' : ''}
+            </p>
+          </div>
+
+        </div>
       </section>
 
       <section className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">

@@ -29,13 +29,13 @@ public class Shipment {
     @Column(nullable = false)
     private LocalDate estimatedDeliveryDate;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    /*@OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "contract_Id")
     private ShippingContract shippingContract;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "inventory_Id")
-    private Inventory inventory;
+    private Inventory inventory;*/
 
     protected Shipment(){
     }
@@ -48,8 +48,8 @@ public class Shipment {
         this.destination = builder.destination;
         this.dispatchDate = builder.dispatchDate;
         this.estimatedDeliveryDate = builder.estimatedDeliveryDate;
-        this.shippingContract = builder.shippingContract;
-        this.inventory = builder.inventory;
+        //this.shippingContract = builder.shippingContract;
+        //this.inventory = builder.inventory;
 
     }
 
@@ -77,12 +77,12 @@ public class Shipment {
         return estimatedDeliveryDate;
     }
 
-    public ShippingContract getShippingContract() {
+   /* public ShippingContract getShippingContract() {
         return shippingContract;
     }
     public Inventory getInventory() {
         return inventory;
-    }
+    }*/
 
     @Override
     public String toString() {
@@ -103,8 +103,8 @@ public class Shipment {
         private String destination;
         private LocalDate dispatchDate;
         private LocalDate estimatedDeliveryDate;
-        private ShippingContract shippingContract;
-        private Inventory inventory;
+        //private ShippingContract shippingContract;
+        //private Inventory inventory;
 
 
         public Builder shipmentId(String shipmentId) {
@@ -131,14 +131,14 @@ public class Shipment {
             this.estimatedDeliveryDate = estimatedDeliveryDate;
             return this;
         }
-        public Builder shippingContract(ShippingContract shippingContract) {
+       /* public Builder shippingContract(ShippingContract shippingContract) {
             this.shippingContract = shippingContract;
             return this;
         }
         public Builder inventory(Inventory inventory){
             this.inventory = inventory;
             return this;
-        }
+        }*/
         public Shipment build() {
             return new Shipment(this);
         }

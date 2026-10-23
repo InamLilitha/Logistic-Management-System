@@ -16,6 +16,7 @@ function Shipments() {
     destination: "",
     dispatchDate: ""
   });
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -80,6 +81,16 @@ function Shipments() {
       setError("Could not create shipment.");
     }
   };
+  const filteredShipments = shipments.filter((shipment) => {
+    const search = searchTerm.toLowerCase().trim();
+
+    return (
+        shipment.shipmentId?.toLowerCase().includes(search) ||
+        shipment.origin?.toLowerCase().includes(search) ||
+        shipment.destination?.toLowerCase().includes(search) ||
+        shipment.weight?.toString().includes(search)
+    );
+  });
 
   const handleDelete = async (shipmentId) => {
 
@@ -222,12 +233,23 @@ function Shipments() {
 
         </section>
 
+
         <section className="shipment-list-section">
 
-          <div className="section-heading">
-            <h2>Shipment Records</h2>
-            <p>View the shipments currently registered in the system.</p>
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <h2 className="text-lg font-bold text-lms-textMain">
+              Shipment Records
+            </h2>
+
+            <input
+                type="text"
+                placeholder="Search shipments..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-56 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-lms-action focus:ring-1 focus:ring-lms-action"
+            />
           </div>
+
 
           {loading ? (
 
@@ -241,7 +263,10 @@ function Shipments() {
                 No shipments have been created yet.
               </div>
 
+
+
           ) : (
+
 
               <div className="shipment-table-container">
 
@@ -259,9 +284,10 @@ function Shipments() {
                   </tr>
                   </thead>
 
+
                   <tbody>
 
-                  {shipments.map((shipment) => (
+                  {filteredShipments.map((shipment) => (
 
                       <tr key={shipment.shipmentId}>
 

@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {Truck, Package, Building2, FileText, Plus, Search, ArrowRight} from 'lucide-react';
+import {Truck, Package, Building2, FileText, Plus, Search, ArrowRight, Clock} from 'lucide-react';
 import {getAllShipments} from "../services/ShipmentService.js";
 import {getShipmentAnalytics} from "../services/ShipmentAnalytics.js";
 import {getShipmentTracking} from "../services/ShipmentTrackingService.js";
+import {getInvoices} from "../services/InvoiceService.js";
 
 const Home = ({setActiveTab}) => {
   const modules = [
@@ -14,6 +15,7 @@ const Home = ({setActiveTab}) => {
 
   const [trackingRecords, setTrackingRecords] = useState([]);
   const [shipments, setShipments] = useState([]);
+  const [pendingInvoices, setPendingInvoices] = useState([]);
 
   useEffect(() => {
     const loadTrackingRecords = async () => {
@@ -44,6 +46,22 @@ const Home = ({setActiveTab}) => {
     };
 
     loadShipments();
+  }, []);
+
+  // Load invoices for the dashboard and keep only those still awaiting payment.
+  useEffect(() => {
+    const loadPendingInvoices = async () => {
+      try {
+        const invoices = await getInvoices();
+        setPendingInvoices(
+          (Array.isArray(invoices) ? invoices : []).filter(invoice => invoice.paymentStatus === 'Pending')
+        );
+      } catch (error) {
+        console.error('Failed to load invoices:', error);
+      }
+    };
+
+    loadPendingInvoices();
   }, []);
 
   const {
@@ -112,6 +130,29 @@ const Home = ({setActiveTab}) => {
           );
         })}
       </section>
+
+      {/* This compact card shows the pending count and total, then opens invoice management. */}
+      <button
+        type="button"
+        onClick={() => setActiveTab('invoices')}
+        className="w-full rounded-lg border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:bg-lms-ice/40"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-lms-textMuted">Pending Invoices</p>
+            <p className="mt-2 text-3xl font-bold text-lms-navy">{pendingInvoices.length}</p>
+            <p className="mt-1 text-sm text-lms-textMuted">
+              R {pendingInvoices.reduce((total, invoice) => total + Number(invoice.total || 0), 0).toFixed(2)} outstanding
+            </p>
+          </div>
+          <span className="flex h-11 w-11 items-center justify-center rounded-md bg-lms-ice text-lms-navy">
+            <Clock className="w-5 h-5" />
+          </span>
+        </div>
+        <span className="mt-5 flex items-center gap-2 font-semibold text-lms-action">
+          Review invoices <ArrowRight className="w-4 h-4" />
+        </span>
+      </button>
 
       <section className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
         <h2 className="mb-5 text-lg font-bold text-lms-textMain">

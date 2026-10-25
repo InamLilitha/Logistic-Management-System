@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Truck, Package, Building2, FileText, Plus, Search, ArrowRight} from 'lucide-react';
 import {getAllShipments} from "../services/ShipmentService.js";
 import {getShipmentAnalytics} from "../services/ShipmentAnalytics.js";
+import {getShipmentTracking} from "../services/ShipmentTrackingService.js";
 
 const Home = ({setActiveTab}) => {
   const modules = [
@@ -11,7 +12,26 @@ const Home = ({setActiveTab}) => {
     {id: 'invoices', title: 'Invoices', description: 'Review and manage shipment invoices.', icon: FileText},
   ];
 
+  const [trackingRecords, setTrackingRecords] = useState([]);
   const [shipments, setShipments] = useState([]);
+
+  useEffect(() => {
+    const loadTrackingRecords = async () => {
+      try {
+        const response = await getShipmentTracking();
+
+        const records = Array.isArray(response)
+          ? response
+          : response.data;
+
+        setTrackingRecords(Array.isArray(records) ? records : []);
+      } catch (error) {
+        console.error('Failed to load shipment tracking:', error);
+      }
+    };
+
+    loadTrackingRecords();
+  }, []);
 
   useEffect(() => {
     const loadShipments = async () => {
@@ -31,6 +51,15 @@ const Home = ({setActiveTab}) => {
     mostCommonRoute,
     mostCommonRouteCount
   } = getShipmentAnalytics(shipments);
+
+  const shipmentStatusAnalytics = {
+    total: trackingRecords.length,
+    pending: trackingRecords.filter(record => record.shipmentStatus === 'Pending').length,
+    inTransit: trackingRecords.filter(record => record.shipmentStatus === 'In Transit').length,
+    outForDelivery: trackingRecords.filter(record => record.shipmentStatus === 'Out for Delivery').length,
+    delivered: trackingRecords.filter(record => record.shipmentStatus === 'Delivered').length,
+    delayed: trackingRecords.filter(record => record.shipmentStatus === 'Delayed').length
+  };
 
   return (
     <div className="p-8 space-y-8">
@@ -112,6 +141,74 @@ const Home = ({setActiveTab}) => {
 
             <p className="mt-1 text-sm text-lms-textMuted">
               {mostCommonRouteCount} shipment{mostCommonRouteCount !== 1 ? 's' : ''}
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <section className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+        <h2 className="mb-2 text-lg font-bold text-lms-textMain">
+          Shipment Status Overview
+        </h2>
+
+        <p className="mb-5 text-sm text-lms-textMuted">
+          Current number of shipments in each tracking status.
+        </p>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-semibold text-lms-textMuted">
+              Total Tracked Shipments
+            </p>
+            <p className="mt-2 text-3xl font-bold text-lms-navy">
+              {shipmentStatusAnalytics.total}
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-semibold text-lms-textMuted">
+              Pending
+            </p>
+            <p className="mt-2 text-3xl font-bold text-lms-navy">
+              {shipmentStatusAnalytics.pending}
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-semibold text-lms-textMuted">
+              In Transit
+            </p>
+            <p className="mt-2 text-3xl font-bold text-lms-navy">
+              {shipmentStatusAnalytics.inTransit}
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-semibold text-lms-textMuted">
+              Out for Delivery
+            </p>
+            <p className="mt-2 text-3xl font-bold text-lms-navy">
+              {shipmentStatusAnalytics.outForDelivery}
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-semibold text-lms-textMuted">
+              Delivered
+            </p>
+            <p className="mt-2 text-3xl font-bold text-lms-navy">
+              {shipmentStatusAnalytics.delivered}
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-semibold text-lms-textMuted">
+              Delayed
+            </p>
+            <p className="mt-2 text-3xl font-bold text-lms-navy">
+              {shipmentStatusAnalytics.delayed}
             </p>
           </div>
 

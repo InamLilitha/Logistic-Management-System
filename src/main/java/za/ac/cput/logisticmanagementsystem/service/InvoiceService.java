@@ -6,6 +6,7 @@ import za.ac.cput.logisticmanagementsystem.domain.Invoice;
 import za.ac.cput.logisticmanagementsystem.repository.IInvoiceRepository;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * InvoiceService.java
@@ -29,6 +30,7 @@ public class InvoiceService implements IInvoiceService {
         if (invoice == null) {
             return null;
         }
+        invoice.invoiceId = UUID.randomUUID().toString();
         return repository.save(invoice);
     }
 
@@ -65,9 +67,12 @@ public class InvoiceService implements IInvoiceService {
         if (invoice != null && paymentStatus != null && !paymentStatus.isEmpty()) {
             Invoice updated = new Invoice.Builder()
                     .invoiceId(invoice.getInvoiceId())
+                    .customerName(invoice.getCustomerName())
+                    .description(invoice.getDescription())
                     .total(invoice.getTotal())
                     .paymentStatus(paymentStatus)
                     .dateIssued(invoice.getDateIssued())
+                    .dueDate(invoice.getDueDate())
                     .build();
             return repository.save(updated);
         }

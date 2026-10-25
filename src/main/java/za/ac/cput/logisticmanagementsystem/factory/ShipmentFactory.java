@@ -36,7 +36,7 @@ public class ShipmentFactory {
             throw new IllegalArgumentException("Dispatch date is required");
         }
 
-        LocalDate estimatedDeliveryDate = dispatchDate.plusDays(3);
+        LocalDate estimatedDeliveryDate = dispatchDate.plusDays(12);
 
 
         return new Shipment.Builder()
@@ -51,7 +51,11 @@ public class ShipmentFactory {
     }
 
     private static String generateShipmentId() {
-        return "SHIP-" + UUID.randomUUID();
+        return "SHIP-" + UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 8)
+                .toUpperCase();
     }
 
 }

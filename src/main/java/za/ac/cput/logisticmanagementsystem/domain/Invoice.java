@@ -18,15 +18,21 @@ public class Invoice{
     @Id
     public String invoiceId;
 
+    public String customerName;
+    public String description;
     public double total;
     public String paymentStatus;
     public Date dateIssued;
+    public Date dueDate;
 
     private Invoice(Builder builder) {
         this.invoiceId = builder.invoiceId;
+        this.customerName = builder.customerName;
+        this.description = builder.description;
         this.total = builder.total;
         this.paymentStatus = builder.paymentStatus;
         this.dateIssued = builder.dateIssued;
+        this.dueDate = builder.dueDate;
     }
 
     public Invoice() {
@@ -35,6 +41,14 @@ public class Invoice{
 
     public String getInvoiceId() {
         return invoiceId;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public double getTotal() {
@@ -49,14 +63,31 @@ public class Invoice{
         return dateIssued;
     }
 
+    public Date getDueDate() {
+        return dueDate;
+    }
+
     public static class Builder {
         private String invoiceId;
+        private String customerName;
+        private String description;
         private double total;
         private String paymentStatus;
         private Date dateIssued;
+        private Date dueDate;
 
         public Builder invoiceId(String invoiceId) {
             this.invoiceId = invoiceId;
+            return this;
+        }
+
+        public Builder customerName(String customerName) {
+            this.customerName = customerName;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
             return this;
         }
 
@@ -72,6 +103,11 @@ public class Invoice{
 
         public Builder dateIssued(Date dateIssued) {
             this.dateIssued = dateIssued;
+            return this;
+        }
+
+        public Builder dueDate(Date dueDate) {
+            this.dueDate = dueDate;
             return this;
         }
 

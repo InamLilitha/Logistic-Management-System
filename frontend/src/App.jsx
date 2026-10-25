@@ -12,18 +12,20 @@ import Home from './pages/Home.jsx';
 import Inventory from './pages/Inventory.jsx';
 import Invoices from './pages/Invoices.jsx';
 import Shipments from './pages/Shipments.jsx';
+import ShipmentTracking from './pages/ShipmentTracking.jsx';
 
 function App() {
-    const [activeTab, setActiveTab] = useState('companies');
+    const [activeTab, setActiveTab] = useState('home');
 
     const renderContent = () => {
         switch (activeTab){
             case 'companies': return <Companies />
-            case 'home': return <Home />
+            case 'home': return <Home setActiveTab={setActiveTab} />
             case 'inventory': return <Inventory />
             case 'invoices': return <Invoices />
             case 'shipments': return <Shipments />
-            default: return <Companies />
+            case 'tracking': return <ShipmentTracking />
+            default: return <Home />
         }
     };
 

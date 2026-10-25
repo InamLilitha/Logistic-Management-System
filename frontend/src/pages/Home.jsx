@@ -1,11 +1,8 @@
-<<<<<<< Updated upstream
-import React from 'react';
-=======
 import React, {useEffect, useState} from 'react';
 import {Truck, Package, Building2, FileText, Plus, Search, ArrowRight} from 'lucide-react';
 import {getAllShipments} from "../services/ShipmentService.js";
 import {getShipmentAnalytics} from "../services/ShipmentAnalytics.js";
-import { getShipmentTracking } from "../services/ShipmentTrackingService.js";
+import {getShipmentTracking} from "../services/ShipmentTrackingService.js";
 
 const Home = ({setActiveTab}) => {
   const modules = [
@@ -16,16 +13,16 @@ const Home = ({setActiveTab}) => {
   ];
 
   const [trackingRecords, setTrackingRecords] = useState([]);
+  const [shipments, setShipments] = useState([]);
 
   useEffect(() => {
     const loadTrackingRecords = async () => {
       try {
         const response = await getShipmentTracking();
 
-        // Supports either an Axios response or an array
         const records = Array.isArray(response)
-            ? response
-            : response.data;
+          ? response
+          : response.data;
 
         setTrackingRecords(Array.isArray(records) ? records : []);
       } catch (error) {
@@ -35,32 +32,6 @@ const Home = ({setActiveTab}) => {
 
     loadTrackingRecords();
   }, []);
-
-  const shipmentStatusAnalytics = {
-    total: trackingRecords.length,
-
-    pending: trackingRecords.filter(
-        record => record.shipmentStatus === 'Pending'
-    ).length,
-
-    inTransit: trackingRecords.filter(
-        record => record.shipmentStatus === 'In Transit'
-    ).length,
-
-    outForDelivery: trackingRecords.filter(
-        record => record.shipmentStatus === 'Out for Delivery'
-    ).length,
-
-    delivered: trackingRecords.filter(
-        record => record.shipmentStatus === 'Delivered'
-    ).length,
-
-    delayed: trackingRecords.filter(
-        record => record.shipmentStatus === 'Delayed'
-    ).length
-  };
-
-  const [shipments, setShipments] = useState([]);
 
   useEffect(() => {
     const loadShipments = async () => {
@@ -80,14 +51,17 @@ const Home = ({setActiveTab}) => {
     mostCommonRoute,
     mostCommonRouteCount
   } = getShipmentAnalytics(shipments);
->>>>>>> Stashed changes
 
-const Home = () => {
+  const shipmentStatusAnalytics = {
+    total: trackingRecords.length,
+    pending: trackingRecords.filter(record => record.shipmentStatus === 'Pending').length,
+    inTransit: trackingRecords.filter(record => record.shipmentStatus === 'In Transit').length,
+    outForDelivery: trackingRecords.filter(record => record.shipmentStatus === 'Out for Delivery').length,
+    delivered: trackingRecords.filter(record => record.shipmentStatus === 'Delivered').length,
+    delayed: trackingRecords.filter(record => record.shipmentStatus === 'Delayed').length
+  };
+
   return (
-<<<<<<< Updated upstream
-    <div>
-      {/* Home / Landing Page */}
-=======
     <div className="p-8 space-y-8">
       <section className="bg-lms-navy rounded-xl p-12 text-white">
         <div className="flex items-center gap-2 text-sm font-semibold text-lms-ice">
@@ -251,7 +225,6 @@ const Home = () => {
           ))}
         </div>
       </section>
->>>>>>> Stashed changes
     </div>
   );
 };

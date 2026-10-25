@@ -85,10 +85,67 @@
   background-color: #1e3a8a;
 }
 
+.save-invoice-btn:disabled,
+.refresh-invoices-btn:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.invoice-form-actions,
+.invoices-toolbar,
+.invoice-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cancel-invoice-btn,
+.refresh-invoices-btn,
+.invoice-row-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #334155;
+  background: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+}
+
+.refresh-invoices-btn,
+.invoice-row-actions button {
+  width: 38px;
+  padding: 8px;
+}
+
+.cancel-invoice-btn:hover,
+.refresh-invoices-btn:hover,
+.invoice-row-actions button:hover {
+  background: #f1f5f9;
+}
+
+.invoices-toolbar {
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
 .invoice-message {
   margin: 14px 0 0;
   color: #475569;
   font-size: 13px;
+}
+
+.invoice-error {
+  color: #b91c1c;
+}
+
+.invoice-success {
+  color: #15803d;
 }
 
 .search-input {
@@ -111,7 +168,7 @@
 
 .invoices-table {
   width: 100%;
-  min-width: 650px;
+  min-width: 1050px;
   border-collapse: collapse;
 }
 
@@ -131,6 +188,15 @@
   border-top: 1px solid #e2e8f0;
   color: #172033;
   font-size: 14px;
+}
+
+.invoice-row-actions {
+  justify-content: flex-start;
+}
+
+.invoice-row-actions button:last-child:hover {
+  border-color: #fca5a5;
+  color: #b91c1c;
 }
 
 .invoices-table tbody tr:hover {

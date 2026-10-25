@@ -39,10 +39,12 @@ public class InvoiceServiceTest {
     @Test
     @Order(1)
     void create() {
+        String submittedId = invoice.getInvoiceId();
         Mockito.when(repository.save(invoice)).thenReturn(invoice);
         Invoice created = service.create(invoice);
         assertNotNull(created);
-        assertEquals(invoice.getInvoiceId(), created.getInvoiceId());
+        assertNotNull(created.getInvoiceId());
+        assertNotEquals(submittedId, created.getInvoiceId());
         System.out.println("Created: " + created);
     }
 

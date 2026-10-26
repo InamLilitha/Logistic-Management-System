@@ -29,10 +29,10 @@ public class Shipment {
     @Column(nullable = false)
     private LocalDate estimatedDeliveryDate;
 
-    /*@OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "contract_Id")
-    private ShippingContract shippingContract;
+    @Column(nullable = false)
+    private String cargoType;
 
+    /*
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "inventory_Id")
     private Inventory inventory;*/
@@ -48,7 +48,7 @@ public class Shipment {
         this.destination = builder.destination;
         this.dispatchDate = builder.dispatchDate;
         this.estimatedDeliveryDate = builder.estimatedDeliveryDate;
-        //this.shippingContract = builder.shippingContract;
+        this.cargoType = builder.cargoType;
         //this.inventory = builder.inventory;
 
     }
@@ -77,9 +77,11 @@ public class Shipment {
         return estimatedDeliveryDate;
     }
 
-   /* public ShippingContract getShippingContract() {
-        return shippingContract;
+    public String getCargoType() {
+        return cargoType;
     }
+
+  /*
     public Inventory getInventory() {
         return inventory;
     }*/
@@ -93,6 +95,7 @@ public class Shipment {
                 ", destination='" + destination + '\'' +
                 ", dispatchDate=" + dispatchDate +
                 ", estimatedDeliveryDate=" + estimatedDeliveryDate +
+                ", cargoType='" + cargoType + '\'' +
                 '}';
     }
 
@@ -103,7 +106,7 @@ public class Shipment {
         private String destination;
         private LocalDate dispatchDate;
         private LocalDate estimatedDeliveryDate;
-        //private ShippingContract shippingContract;
+        private String cargoType;
         //private Inventory inventory;
 
 
@@ -131,9 +134,12 @@ public class Shipment {
             this.estimatedDeliveryDate = estimatedDeliveryDate;
             return this;
         }
-       /* public Builder shippingContract(ShippingContract shippingContract) {
-            this.shippingContract = shippingContract;
+
+        public Builder cargoType(String cargoType) {
+            this.cargoType = cargoType;
             return this;
+        }
+       /*
         }
         public Builder inventory(Inventory inventory){
             this.inventory = inventory;

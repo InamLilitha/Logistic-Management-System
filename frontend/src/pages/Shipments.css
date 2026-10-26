@@ -363,3 +363,101 @@
         font-size: 20px;
     }
 }
+/* Cargo type dropdown */
+
+.form-group select {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #111827;
+    font: inherit;
+    outline: none;
+    transition: border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.form-group select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Shipment action buttons */
+
+.shipment-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.edit-button,
+.delete-button,
+.secondary-button {
+    padding: 8px 14px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.edit-button {
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1d4ed8;
+}
+
+.edit-button:hover {
+    background-color: #dbeafe;
+}
+
+.delete-button {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+}
+
+.delete-button:hover {
+    background-color: #fee2e2;
+}
+
+.secondary-button {
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #374151;
+}
+
+.secondary-button:hover {
+    background-color: #f3f4f6;
+}
+
+.edit-button:active,
+.delete-button:active,
+.secondary-button:active {
+    transform: scale(0.98);
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.shipment-actions button {
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .shipment-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .shipment-actions button {
+        width: 100%;
+    }
+}

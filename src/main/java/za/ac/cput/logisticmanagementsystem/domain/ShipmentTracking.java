@@ -1,19 +1,18 @@
+
 package za.ac.cput.logisticmanagementsystem.domain;
-
-
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.JoinColumn;
 import java.time.LocalDate;
-import java.util.Objects;
 
 @Entity
 public class ShipmentTracking {
 
     @Id
     private String trackingId;
+
     private String trackingNumber;
     private String currentLocation;
     private String shipmentStatus;
@@ -24,7 +23,11 @@ public class ShipmentTracking {
     @JoinColumn(name = "shipment_id")
     private Shipment shipment;
 
-    // Private constructor
+    // Public no-argument constructor required by Jackson and JPA
+    public ShipmentTracking() {
+    }
+
+    // Private constructor for Builder
     private ShipmentTracking(Builder builder) {
         this.trackingId = builder.trackingId;
         this.trackingNumber = builder.trackingNumber;
@@ -125,8 +128,4 @@ public class ShipmentTracking {
                 ", shipment=" + shipment +
                 '}';
     }
-
-
-
-
 }

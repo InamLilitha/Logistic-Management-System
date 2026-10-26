@@ -5,9 +5,9 @@
  *  */
 
 import React from 'react';
-   import {LayoutDashboard, Truck, Package, Building2, FileText, ClipboardClock, FileSignature, Settings, Bell} from 'lucide-react';
+import {LayoutDashboard, Truck, Package, Building2, FileText, ClipboardClock, FileSignature, Users, UserCircle, LogOut} from 'lucide-react';
 
-const LmsLayout = ({children, activeTab, setActiveTab}) => {
+const LmsLayout = ({children, activeTab, setActiveTab, currentUser, isAdmin, logout}) => {
     const navItems = [
         {id: 'home', label: 'Dashboard', icon: LayoutDashboard},
         {id: 'companies', label: 'Companies', icon: Building2},
@@ -16,11 +16,12 @@ const LmsLayout = ({children, activeTab, setActiveTab}) => {
         {id: 'shipments', label: 'Shipments', icon: Truck},
         {id: 'tracking', label: 'ShipmentTracking', icon: ClipboardClock},
         {id: 'invoices', label: 'Invoices', icon: FileText},
+        ...(isAdmin ? [{id: 'users', label: 'Staff Profiles', icon: Users}] : []),
+        {id: 'profile', label: 'My Profile', icon: UserCircle},
     ];
 
     return(
         <div className="flex h-screen bg-lms-bg overflow-hidden">
-            {/* Sidebar */}
             <aside className="w-64 bg-lms-navy text-white flex flex-col justify-between shrink-0">
                 <div>
                     <div className="p-6 border-b border-blue-900/50 flex items-center gap-3">
@@ -43,6 +44,13 @@ const LmsLayout = ({children, activeTab, setActiveTab}) => {
                             );
                         })}
                     </nav>
+                </div>
+                <div className="border-t border-blue-900/50 p-4">
+                    <p className="truncate text-sm font-semibold">{currentUser.name}</p>
+                    <p className="text-xs uppercase tracking-wide text-lms-ice">{currentUser.role}</p>
+                    <button onClick={logout} className="mt-4 flex w-full items-center gap-2 rounded px-2 py-2 text-sm text-lms-ice hover:bg-blue-900/50">
+                        <LogOut className="h-4 w-4" /> Sign out
+                    </button>
                 </div>
             </aside>
 

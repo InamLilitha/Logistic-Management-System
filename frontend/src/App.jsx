@@ -14,25 +14,34 @@ import Inventory from './pages/Inventory.jsx';
 import Invoices from './pages/Invoices.jsx';
 import Shipments from './pages/Shipments.jsx';
 import ShipmentTracking from './pages/ShipmentTracking.jsx';
+import Login from './auth/Login.jsx';
+import UserManagement from './auth/UserManagement.jsx';
+import Profile from './auth/Profile.jsx';
+import { useAuth } from './auth/AuthContext';
 
 function App() {
     const [activeTab, setActiveTab] = useState('home');
+    const { currentUser, isAdmin, logout } = useAuth();
+
+    if (!currentUser) return <Login />;
 
     const renderContent = () => {
         switch (activeTab){
-            case 'companies': return <Companies />
-            case 'contracts': return <Contracts />
-            case 'home': return <Home setActiveTab={setActiveTab} />
+            case 'companies': return <Companies canEdit={isAdmin} />
+            case 'contracts': return <Contracts canEdit={isAdmin} />
+            case 'home': return <Home setActiveTab={setActiveTab} canEdit={isAdmin} />
             case 'inventory': return <Inventory />
-            case 'invoices': return <Invoices />
-            case 'shipments': return <Shipments />
-            case 'tracking': return <ShipmentTracking />
+            case 'invoices': return <Invoices canEdit={isAdmin} />
+            case 'shipments': return <Shipments canEdit={isAdmin} />
+            case 'tracking': return <ShipmentTracking canEdit={isAdmin} />
+            case 'users': return isAdmin ? <UserManagement /> : <Home setActiveTab={setActiveTab} canEdit={false} />
+            case 'profile': return <Profile />
             default: return <Home />
         }
     };
 
   return (
-    <LmsLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+    <LmsLayout activeTab={activeTab} setActiveTab={setActiveTab} currentUser={currentUser} isAdmin={isAdmin} logout={logout}>
         {renderContent()}
     </LmsLayout>
   );

@@ -7,7 +7,7 @@ import {
 } from "../services/ShipmentService";
 import "./Shipments.css";
 
-function Shipments() {
+function Shipments({ canEdit = true }) {
 
   const [shipments, setShipments] = useState([]);
 
@@ -174,7 +174,7 @@ function Shipments() {
           </div>
         </div>
 
-        <section className="shipment-form-card">
+        {canEdit && <section className="shipment-form-card">
 
           <div className="section-heading">
             <h2>{editingShipmentId ? "Edit Shipment" : "Create Shipment"}</h2>
@@ -318,7 +318,7 @@ function Shipments() {
 
           </form>
 
-        </section>
+        </section>}
 
 
         <section className="shipment-list-section">
@@ -409,21 +409,21 @@ function Shipments() {
 
                         <td className="shipment-actions">
 
-                          <button
+                          {canEdit && <button
                               type="button"
                               className="edit-button"
                               onClick={() => handleEdit(shipment)}
                           >
                             Edit
-                          </button>
+                          </button>}
 
-                          <button
+                          {canEdit && <button
                               type="button"
                               className="delete-button"
                               onClick={() => handleDelete(shipment.shipmentId)}
                           >
                             Delete
-                          </button>
+                          </button>}
 
                         </td>
 

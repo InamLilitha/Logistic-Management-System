@@ -6,7 +6,7 @@ import {getShipmentTracking} from "../services/ShipmentTrackingService.js";
 import {getInvoices} from "../services/InvoiceService.js";
 import ContractExpiryCard from "../components/ContractExpiryCard.jsx";
 
-const Home = ({setActiveTab}) => {
+const Home = ({setActiveTab, canEdit = true}) => {
   const modules = [
     {id: 'shipments', title: 'Shipments', description: 'Create and manage delivery shipments.', icon: Truck},
     {id: 'inventory', title: 'Inventory', description: 'Keep track of stock and available goods.', icon: Package},
@@ -90,14 +90,13 @@ const Home = ({setActiveTab}) => {
         <h1 className="mt-6 max-w-2xl text-4xl font-bold">Welcome to the Logistic Management System</h1>
         <p className="mt-4 text-lms-ice">Manage companies, inventory, shipments and invoices in one place.</p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => setActiveTab('shipments')}
-            className="flex min-h-11 items-center gap-2 rounded-md bg-lms-action px-5 font-semibold text-white"
+          {canEdit && <button
+              type="button"
+              onClick={() => setActiveTab('shipments')}
+              className="flex min-h-11 items-center gap-2 rounded-md bg-lms-action px-5 font-semibold text-white"
           >
-            <Plus className="w-5 h-5" />
-            Create Shipment
-          </button>
+            <Plus className="w-5 h-5" /> Create Shipment
+          </button>}
           <button
             type="button"
             onClick={() => setActiveTab('tracking')}

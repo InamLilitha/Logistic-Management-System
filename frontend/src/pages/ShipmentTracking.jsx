@@ -8,7 +8,7 @@ import {
 
 import './ShipmentTracking.css';
 
-function ShipmentTracking() {
+function ShipmentTracking({ canEdit = true }) {
 
   const [trackingRecords, setTrackingRecords] = useState([]);
 
@@ -111,7 +111,7 @@ function ShipmentTracking() {
 
         {/* Create Tracking Record */}
 
-        <section className="tracking-form-card">
+        {canEdit && <section className="tracking-form-card">
 
           <h2>Create Tracking Record</h2>
 
@@ -199,7 +199,7 @@ function ShipmentTracking() {
 
           </form>
 
-        </section>
+        </section>}
 
 
         {/* Tracking Records */}
@@ -301,7 +301,7 @@ function ShipmentTracking() {
 
                         <td>
 
-                          <button
+                          {canEdit && <button
                               className="delete-tracking-btn"
                               onClick={() =>
                                   handleDelete(
@@ -310,7 +310,7 @@ function ShipmentTracking() {
                               }
                           >
                             Delete
-                          </button>
+                          </button>}
 
                         </td>
 

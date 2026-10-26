@@ -3,7 +3,7 @@ import { RefreshCw, Trash2, X } from 'lucide-react';
 import { getInvoices, createInvoice, updateInvoice, deleteInvoice } from '../services/InvoiceService';
 import './Invoices.css';
 
-function Invoices() {
+function Invoices({ canEdit = true }) {
     const [invoices, setInvoices] = useState([]);
     const [formData, setFormData] = useState({
         customerName: '',
@@ -112,7 +112,7 @@ function Invoices() {
                 <p>Manage customer invoices and payment status</p>
             </header>
 
-            <section className="invoice-form-card">
+            {canEdit && <section className="invoice-form-card">
                 <h2>{editing ? 'Edit Invoice' : 'Make an Invoice'}</h2>
                 <form className="invoice-form" onSubmit={handleSubmit}>
                     <input
@@ -177,7 +177,7 @@ function Invoices() {
                         )}
                     </div>
                 </form>
-            </section>
+            </section>}
 
             {error && <p className="invoice-message invoice-error" role="alert">{error}</p>}
             {message && <p className="invoice-message invoice-success" role="status">{message}</p>}
@@ -226,9 +226,9 @@ function Invoices() {
                                     <td>{invoice.dateIssued ? new Date(invoice.dateIssued).toLocaleDateString() : '—'}</td>
                                     <td>{invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : '—'}</td>
                                     <td className="invoice-row-actions">
-                                        <button type="button" onClick={() => handleDelete(invoice.invoiceId)} aria-label={`Delete ${invoice.invoiceId}`} title="Delete invoice">
+                                        {canEdit && <button type="button" onClick={() => handleDelete(invoice.invoiceId)} aria-label={`Delete ${invoice.invoiceId}`} title="Delete invoice">
                                             <Trash2 size={16} />
-                                        </button>
+                                        </button>}
                                     </td>
                                 </tr>
                             ))

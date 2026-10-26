@@ -8,7 +8,7 @@ import React, {useState, useEffect} from 'react';
 import {getAllCompanies, createCompany, updateCompany, deleteCompany, getCompanyById} from '../services/CompanyService.js';
 import {Building2, Plus, Trash2, Edit3, Eye, Search, Mail, Phone, Hash, X} from 'lucide-react';
 
-const Companies = () => {
+const Companies = ({ canEdit = true }) => {
   const [companies, setCompanies] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({companyName: '', taxId: '', phoneNumber: '', emailAddress: ''});
@@ -60,7 +60,7 @@ const Companies = () => {
     <div className="p-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form */}
-        <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm h-fit">
+        {canEdit && <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm h-fit">
           <h2 className="text-lg font-bold text-lms-textMain mb-4 flex items-center gap-2">
             <Plus className="w-5 h-5 text-lms-action" /> Add Company
           </h2>
@@ -71,7 +71,7 @@ const Companies = () => {
             <input type="email" name="emailAddress" placeholder="Email Address" value={formData.emailAddress} onChange={handleInputChange} className="w-full p-2.5 border rounded text-sm" required/>
             <button type="submit" className="w-full bg-lms-action text-white py-2.5 rounded text-sm font-medium">Save Company</button>
           </form>
-        </div>
+        </div>}
 
         {/* Table */}
         <div className="lg:col-span-2 bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
@@ -96,8 +96,8 @@ const Companies = () => {
                   <td className="p-3 text-xs text-lms-textMuted">{c.emailAddress} | {c.phoneNumber}</td>
                   <td className="p-3 text-right space-x-1">
                     <button onClick={() => getCompanyById(c.companyId).then(res => setViewingCompany(res.data))} className="text-lms-action p-1.5"><Eye className="w-4 h-4" /> </button>
-                    <button onClick={() => setEditingCompany(c)} className="text-amber-600 p-1.5"><Edit3 className="w-4 h-4"/> </button>
-                    <button onClick={() => handleDelete(c.companyId)} className="text-lms-danger p-1.5"><Trash2 className="w-4 h-4"/> </button>
+                    {canEdit && <button onClick={() => setEditingCompany(c)} className="text-amber-600 p-1.5"><Edit3 className="w-4 h-4"/> </button>}
+                    {canEdit && <button onClick={() => handleDelete(c.companyId)} className="text-lms-danger p-1.5"><Trash2 className="w-4 h-4"/> </button>}
                   </td>
                 </tr>
             ))}
@@ -107,7 +107,7 @@ const Companies = () => {
       </div>
 
       {/* Edit Modal */}
-      {editingCompany &&(
+      {canEdit && editingCompany &&(
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg p-6 max-w-md w-full">
               <h3 className="text-lg font-bold mb-4">Edit Company</h3>

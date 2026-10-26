@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Pencil, RefreshCw, Trash2, X } from 'lucide-react';
+import { RefreshCw, Trash2, X } from 'lucide-react';
 import { getInvoices, createInvoice, updateInvoice, deleteInvoice } from '../services/InvoiceService';
 import './Invoices.css';
 
@@ -83,24 +83,6 @@ function Invoices() {
         });
         setEditing(false);
         setEditingInvoiceId(null);
-    }
-
-    function startEditing(invoice) {
-        setFormData({
-            customerName: invoice.customerName || '',
-            description: invoice.description || '',
-            total: String(invoice.total),
-            paymentStatus: invoice.paymentStatus,
-            dateIssued: new Date(invoice.dateIssued).toISOString().slice(0, 10),
-            dueDate: invoice.dueDate
-                ? new Date(invoice.dueDate).toISOString().slice(0, 10)
-                : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-        });
-        setEditing(true);
-        setEditingInvoiceId(invoice.invoiceId);
-        setMessage('');
-        setError('');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function handleDelete(invoiceId) {
@@ -244,9 +226,6 @@ function Invoices() {
                                     <td>{invoice.dateIssued ? new Date(invoice.dateIssued).toLocaleDateString() : '—'}</td>
                                     <td>{invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : '—'}</td>
                                     <td className="invoice-row-actions">
-                                        <button type="button" onClick={() => startEditing(invoice)} aria-label={`Edit ${invoice.invoiceId}`} title="Edit invoice">
-                                            <Pencil size={16} />
-                                        </button>
                                         <button type="button" onClick={() => handleDelete(invoice.invoiceId)} aria-label={`Delete ${invoice.invoiceId}`} title="Delete invoice">
                                             <Trash2 size={16} />
                                         </button>

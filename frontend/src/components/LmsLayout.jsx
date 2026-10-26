@@ -10,11 +10,11 @@ import React from 'react';
 const LmsLayout = ({children, activeTab, setActiveTab}) => {
     const navItems = [
         {id: 'home', label: 'Dashboard', icon: LayoutDashboard},
+        {id: 'companies', label: 'Companies', icon: Building2},
+        {id: 'inventory', label: 'Inventory', icon: Package},
+        {id: 'contracts', label: 'Contracts', icon: FileSignature},
         {id: 'shipments', label: 'Shipments', icon: Truck},
         {id: 'tracking', label: 'ShipmentTracking', icon: ClipboardClock},
-        {id: 'inventory', label: 'Inventory', icon: Package},
-        {id: 'companies', label: 'Companies', icon: Building2},
-        {id: 'contracts', label: 'Contracts', icon: FileSignature},
         {id: 'invoices', label: 'Invoices', icon: FileText},
     ];
 

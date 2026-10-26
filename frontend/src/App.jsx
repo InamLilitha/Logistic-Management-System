@@ -23,7 +23,7 @@ function App() {
             case 'companies': return <Companies />
             case 'contracts': return <Contracts />
             case 'home': return <Home setActiveTab={setActiveTab} />
-            case 'inventory': return <Inventory />
+            case 'inventory': return <Inventory setActiveTab={setActiveTab} />
             case 'invoices': return <Invoices />
             case 'shipments': return <Shipments />
             case 'tracking': return <ShipmentTracking />

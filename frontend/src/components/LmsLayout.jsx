@@ -5,7 +5,7 @@
  *  */
 
 import React from 'react';
-import {LayoutDashboard, Truck, Package, Building2, FileText, ClipboardClock, Settings, Bell} from 'lucide-react';
+   import {LayoutDashboard, Truck, Package, Building2, FileText, ClipboardClock, FileSignature, Settings, Bell} from 'lucide-react';
 
 const LmsLayout = ({children, activeTab, setActiveTab}) => {
     const navItems = [
@@ -14,6 +14,7 @@ const LmsLayout = ({children, activeTab, setActiveTab}) => {
         {id: 'tracking', label: 'ShipmentTracking', icon: ClipboardClock},
         {id: 'inventory', label: 'Inventory', icon: Package},
         {id: 'companies', label: 'Companies', icon: Building2},
+        {id: 'contracts', label: 'Contracts', icon: FileSignature},
         {id: 'invoices', label: 'Invoices', icon: FileText},
     ];
 

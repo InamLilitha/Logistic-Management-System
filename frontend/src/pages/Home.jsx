@@ -4,6 +4,7 @@ import {getAllShipments} from "../services/ShipmentService.js";
 import {getShipmentAnalytics} from "../services/ShipmentAnalytics.js";
 import {getShipmentTracking} from "../services/ShipmentTrackingService.js";
 import {getInvoices} from "../services/InvoiceService.js";
+import ContractExpiryCard from "../components/ContractExpiryCard.jsx";
 
 const Home = ({setActiveTab}) => {
   const modules = [
@@ -130,6 +131,7 @@ const Home = ({setActiveTab}) => {
           );
         })}
       </section>
+<ContractExpiryCard setActiveTab={setActiveTab} />
 
       {/* This compact card shows the pending count and total, then opens invoice management. */}
       <button

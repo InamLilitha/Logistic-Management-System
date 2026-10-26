@@ -131,7 +131,6 @@ const Home = ({setActiveTab}) => {
         })}
       </section>
 
-      {/* This compact card shows the pending count and total, then opens invoice management. */}
       <button
         type="button"
         onClick={() => setActiveTab('invoices')}

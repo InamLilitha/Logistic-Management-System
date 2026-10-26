@@ -8,6 +8,7 @@ import './index.css';
 import React, {useState} from 'react';
 import LmsLayout from './components/LmsLayout.jsx';
 import Companies from './pages/Companies.jsx';
+import Contracts from './pages/Contracts.jsx'
 import Home from './pages/Home.jsx';
 import Inventory from './pages/Inventory.jsx';
 import Invoices from './pages/Invoices.jsx';
@@ -20,6 +21,7 @@ function App() {
     const renderContent = () => {
         switch (activeTab){
             case 'companies': return <Companies />
+            case 'contracts': return <Contracts />
             case 'home': return <Home setActiveTab={setActiveTab} />
             case 'inventory': return <Inventory />
             case 'invoices': return <Invoices />

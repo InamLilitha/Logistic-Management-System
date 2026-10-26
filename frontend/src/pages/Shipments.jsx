@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   getAllShipments,
   createShipment,
+  updateShipment,
   deleteShipment
 } from "../services/ShipmentService";
 import "./Shipments.css";
@@ -14,8 +15,10 @@ function Shipments() {
     weight: "",
     origin: "",
     destination: "",
-    dispatchDate: ""
+    dispatchDate: "",
+    cargoType: "General Cargo"
   });
+  const [editingShipmentId, setEditingShipmentId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -58,27 +61,49 @@ function Shipments() {
     try {
       const shipment = {
         weight: Number(formData.weight),
-        origin: formData.origin,
-        destination: formData.destination,
-        dispatchDate: formData.dispatchDate
+        origin: formData.origin.trim(),
+        destination: formData.destination.trim(),
+        dispatchDate: formData.dispatchDate,
+        cargoType: formData.cargoType
       };
 
-      await createShipment(shipment);
+      if (editingShipmentId) {
 
-      setSuccess("Shipment created successfully.");
+        await updateShipment({
+          ...shipment,
+          shipmentId: editingShipmentId
+        });
+
+        setSuccess("Shipment updated successfully.");
+
+      } else {
+
+        await createShipment(shipment);
+
+        setSuccess("Shipment created successfully.");
+      }
 
       setFormData({
         weight: "",
         origin: "",
         destination: "",
-        dispatchDate: ""
+        dispatchDate: "",
+        cargoType: "General Cargo"
       });
 
-      loadShipments();
+      setEditingShipmentId(null);
+
+      await loadShipments();
 
     } catch (error) {
-      console.error(error);
-      setError("Could not create shipment.");
+
+      console.error("Shipment submission failed:", error);
+
+      setError(
+          editingShipmentId
+              ? "Could not update shipment."
+              : "Could not create shipment."
+      );
     }
   };
   const filteredShipments = shipments.filter((shipment) => {
@@ -88,9 +113,30 @@ function Shipments() {
         shipment.shipmentId?.toLowerCase().includes(search) ||
         shipment.origin?.toLowerCase().includes(search) ||
         shipment.destination?.toLowerCase().includes(search) ||
-        shipment.weight?.toString().includes(search)
+        shipment.weight?.toString().includes(search) ||
+        shipment.cargoType?.toLowerCase().includes(search)
     );
   });
+  const handleEdit = (shipment) => {
+
+    setEditingShipmentId(shipment.shipmentId);
+
+    setFormData({
+      weight: shipment.weight,
+      origin: shipment.origin,
+      destination: shipment.destination,
+      dispatchDate: shipment.dispatchDate,
+      cargoType: shipment.cargoType || "General Cargo"
+    });
+
+    setError("");
+    setSuccess("");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  };
 
   const handleDelete = async (shipmentId) => {
 
@@ -131,8 +177,8 @@ function Shipments() {
         <section className="shipment-form-card">
 
           <div className="section-heading">
-            <h2>Create Shipment</h2>
-            <p>Enter the shipment details below.</p>
+            <h2>{editingShipmentId ? "Edit Shipment" : "Create Shipment"}</h2>
+            <p>{editingShipmentId ? "Update the shipment details below." : "Enter the shipment details below."}</p>
           </div>
 
           {error && (
@@ -215,6 +261,24 @@ function Shipments() {
                     required
                 />
               </div>
+              <div className="form-group">
+                <label htmlFor="cargoType">
+                  Cargo Type
+                </label>
+
+                <select
+                    id="cargoType"
+                    name="cargoType"
+                    value={formData.cargoType}
+                    onChange={handleChange}
+                    required
+                >
+                  <option value="General Cargo">General Cargo</option>
+                  <option value="Fragile">Fragile</option>
+                  <option value="Perishable Goods">Perishable Goods</option>
+                  <option value="Hazardous Materials">Hazardous Materials</option>
+                </select>
+              </div>
 
             </div>
 
@@ -224,8 +288,31 @@ function Shipments() {
                   type="submit"
                   className="primary-button"
               >
-                Create Shipment
+                {editingShipmentId ? "Save Changes" : "Create Shipment"}
               </button>
+
+              {editingShipmentId && (
+                  <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => {
+                        setEditingShipmentId(null);
+
+                        setFormData({
+                          weight: "",
+                          origin: "",
+                          destination: "",
+                          dispatchDate: "",
+                          cargoType: "General Cargo"
+                        });
+
+                        setError("");
+                        setSuccess("");
+                      }}
+                  >
+                    Cancel
+                  </button>
+              )}
 
             </div>
 
@@ -276,11 +363,12 @@ function Shipments() {
                   <tr>
                     <th>Shipment ID</th>
                     <th>Weight</th>
+                    <th>Cargo Type</th>
                     <th>Origin</th>
                     <th>Destination</th>
                     <th>Dispatch Date</th>
                     <th>Estimated Delivery</th>
-                    <th>Action</th>
+                    <th>Actions</th>
                   </tr>
                   </thead>
 
@@ -299,6 +387,9 @@ function Shipments() {
                           {shipment.weight} kg
                         </td>
 
+                        <td>{shipment.cargoType}</td>
+
+
                         <td>
                           {shipment.origin}
                         </td>
@@ -306,6 +397,7 @@ function Shipments() {
                         <td>
                           {shipment.destination}
                         </td>
+
 
                         <td>
                           {shipment.dispatchDate}
@@ -315,14 +407,20 @@ function Shipments() {
                           {shipment.estimatedDeliveryDate}
                         </td>
 
-                        <td>
+                        <td className="shipment-actions">
+
+                          <button
+                              type="button"
+                              className="edit-button"
+                              onClick={() => handleEdit(shipment)}
+                          >
+                            Edit
+                          </button>
 
                           <button
                               type="button"
                               className="delete-button"
-                              onClick={() =>
-                                  handleDelete(shipment.shipmentId)
-                              }
+                              onClick={() => handleDelete(shipment.shipmentId)}
                           >
                             Delete
                           </button>

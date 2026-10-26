@@ -16,7 +16,8 @@ public class ShipmentFactory {
             double weight,
             String origin,
             String destination,
-            LocalDate dispatchDate) {
+            LocalDate dispatchDate,
+            String cargoType) {
 
 
         if(weight <=0 ){
@@ -35,8 +36,22 @@ public class ShipmentFactory {
         if(dispatchDate == null) {
             throw new IllegalArgumentException("Dispatch date is required");
         }
-
         LocalDate estimatedDeliveryDate = dispatchDate.plusDays(12);
+
+        if(cargoType == null || cargoType.trim().isEmpty()) {
+            throw new IllegalArgumentException("Cargo type is required");
+        }
+        String normalizedCargoType = cargoType.trim().toUpperCase();
+        if (!normalizedCargoType.equalsIgnoreCase("General Cargo")
+                && !normalizedCargoType.equalsIgnoreCase("Fragile")
+                && !normalizedCargoType.equalsIgnoreCase("Perishable Goods")
+                && !normalizedCargoType.equalsIgnoreCase("Hazardous Materials")) {
+
+            throw new IllegalArgumentException(
+                    "Invalid cargo type. Must be General Cargo, Fragile, Perishable Goods, or Hazardous Materials"
+            );
+        }
+
 
 
         return new Shipment.Builder()
@@ -46,6 +61,7 @@ public class ShipmentFactory {
                 .destination(destination.trim())
                 .dispatchDate(dispatchDate)
                 .estimatedDeliveryDate(estimatedDeliveryDate)
+                .cargoType(normalizedCargoType)
                 .build();
 
     }

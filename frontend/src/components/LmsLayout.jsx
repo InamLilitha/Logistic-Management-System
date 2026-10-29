@@ -1,72 +1,284 @@
-/* 24/08/2026
- *Lmslayout.jsx
- *LmsLayout in components folder
- *Maghdie Petersen 230600204
- *  */
+/*
+ * LmsLayout.jsx
+ * Logistic Management System
+ */
 
-import React from 'react';
-import {LayoutDashboard, Truck, Package, Building2, FileText, ClipboardClock, FileSignature, Users, UserCircle, LogOut} from 'lucide-react';
+import React, { useState } from 'react';
 
-const LmsLayout = ({children, activeTab, setActiveTab, currentUser, isAdmin, logout}) => {
+import {
+    LayoutDashboard,
+    Truck,
+    Package,
+    Building2,
+    FileText,
+    ClipboardClock,
+    FileSignature,
+    Users,
+    UserCircle,
+    LogOut,
+    Menu,
+    X,
+    ChevronRight,
+    Bell,
+    Boxes,
+    ShieldCheck,
+} from 'lucide-react';
+
+const LmsLayout = ({
+    children,
+    activeTab,
+    setActiveTab,
+    currentUser,
+    isAdmin,
+    logout,
+}) => {
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
     const navItems = [
-        {id: 'home', label: 'Dashboard', icon: LayoutDashboard},
-        {id: 'companies', label: 'Companies', icon: Building2},
-        {id: 'inventory', label: 'Inventory', icon: Package},
-        {id: 'contracts', label: 'Contracts', icon: FileSignature},
-        {id: 'shipments', label: 'Shipments', icon: Truck},
-        {id: 'tracking', label: 'ShipmentTracking', icon: ClipboardClock},
-        {id: 'invoices', label: 'Invoices', icon: FileText},
-        ...(isAdmin ? [{id: 'users', label: 'Staff Profiles', icon: Users}] : []),
-        {id: 'profile', label: 'My Profile', icon: UserCircle},
+        { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'companies', label: 'Companies', icon: Building2 },
+        { id: 'inventory', label: 'Inventory', icon: Package },
+        { id: 'contracts', label: 'Contracts', icon: FileSignature },
+        { id: 'shipments', label: 'Shipments', icon: Truck },
+        { id: 'tracking', label: 'Shipment Tracking', icon: ClipboardClock },
+        { id: 'invoices', label: 'Invoices', icon: FileText },
+        ...(isAdmin
+            ? [{ id: 'users', label: 'Staff Profiles', icon: Users }]
+            : []),
+        { id: 'profile', label: 'My Profile', icon: UserCircle },
     ];
 
-    return(
-        <div className="flex h-screen bg-lms-bg overflow-hidden">
-            <aside className="w-64 bg-lms-navy text-white flex flex-col justify-between shrink-0">
-                <div>
-                    <div className="p-6 border-b border-blue-900/50 flex items-center gap-3">
-                        <Truck className="w-6 h-6 text-lms-ice"/>
-                        <h1 className="font-bold tracking-wide text-base">LMS Platform</h1>
+    const activeItem =
+        navItems.find((item) => item.id === activeTab) || navItems[0];
+
+    const displayName =
+        currentUser?.name ||
+        currentUser?.username ||
+        currentUser?.email ||
+        'User';
+
+    const displayRole = String(currentUser?.role || 'Staff')
+        .replace(/^ROLE_/i, '')
+        .replaceAll('_', ' ');
+
+    const initials =
+        displayName
+            .split(' ')
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((part) => part.charAt(0).toUpperCase())
+            .join('') || 'U';
+
+    const handleNavigation = (tabId) => {
+        setActiveTab(tabId);
+        setSidebarOpen(false);
+    };
+
+    return (
+        <div className="lms-app">
+            {sidebarOpen && (
+                <button
+                    type="button"
+                    className="lms-mobile-overlay"
+                    aria-label="Close navigation menu"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
+            <aside
+                className={`lms-sidebar ${
+    sidebarOpen ? 'lms-sidebar-open' : ''
+}`}
+            >
+                <div className="lms-brand">
+                    <div className="lms-brand-icon">
+                        <Truck size={24} strokeWidth={2.2} />
                     </div>
-                    <nav className="mt-6 px-3 space-y-1">
+
+                    <div className="lms-brand-copy">
+                        <h1>ModuFlow</h1>
+                        <span>LOGISTICS MANAGEMENT</span>
+                    </div>
+
+                    <button
+                        type="button"
+                        className="lms-mobile-close"
+                        aria-label="Close navigation"
+                        onClick={() => setSidebarOpen(false)}
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
+
+                <div className="lms-sidebar-content">
+                    <p className="lms-nav-heading">MAIN MENU</p>
+
+                    <nav className="lms-nav" aria-label="Main navigation">
                         {navItems.map((item) => {
                             const Icon = item.icon;
+                            const isActive = activeTab === item.id;
+
                             return (
                                 <button
-                                key = {item.id}
-                                onClick={() => setActiveTab(item.id)}
-                                className={`w-full flex items-center gap-3 px-4 rounded-md text-sm font-medium transition ${
-                                    activeTab=== item.id ? 'bg-lms-action text-white' : 'text-lms-ice/80 hover:bg-blue-900/50'}`}
+                                    key={item.id}
+                                    type="button"
+                                    onClick={() => handleNavigation(item.id)}
+                                    className={`lms-nav-item ${
+    isActive ? 'lms-nav-active' : ''
+}`}
+                                    aria-current={
+                                        isActive ? 'page' : undefined
+                                    }
                                 >
-                                    <Icon className="w-5 h-5"/>
+                                    <Icon
+                                        size={19}
+                                        strokeWidth={isActive ? 2.2 : 1.8}
+                                    />
+
                                     <span>{item.label}</span>
+
+                                    {isActive && (
+                                        <ChevronRight
+                                            size={16}
+                                            className="lms-nav-chevron"
+                                        />
+                                    )}
                                 </button>
                             );
                         })}
                     </nav>
+
+                    <div className="lms-sidebar-tip">
+                        <div className="lms-tip-icon">
+                            <Boxes size={21} />
+                        </div>
+
+                        <p className="lms-tip-title">
+                            Everything in motion.
+                        </p>
+
+                        <p className="lms-tip-text">
+                            Manage your shipments, inventory, contracts and
+                            logistics operations in one place.
+                        </p>
+
+                        <div className="lms-tip-status">
+                            <span className="lms-status-dot" />
+                            Workspace ready
+                        </div>
+                    </div>
                 </div>
-                <div className="border-t border-blue-900/50 p-4">
-                    <p className="truncate text-sm font-semibold">{currentUser.name}</p>
-                    <p className="text-xs uppercase tracking-wide text-lms-ice">{currentUser.role}</p>
-                    <button onClick={logout} className="mt-4 flex w-full items-center gap-2 rounded px-2 py-2 text-sm text-lms-ice hover:bg-blue-900/50">
-                        <LogOut className="h-4 w-4" /> Sign out
+
+                <div className="lms-sidebar-footer">
+                    <div className="lms-user-profile">
+                        <div className="lms-avatar">
+                            {initials}
+                        </div>
+
+                        <div className="lms-user-info">
+                            <p className="lms-user-name">{displayName}</p>
+
+                            <span className="lms-user-role">
+                                {displayRole}
+                            </span>
+                        </div>
+
+                        {isAdmin && (
+                            <span
+                                className="lms-admin-indicator"
+                                title="Administrator"
+                                aria-label="Administrator"
+                            >
+                                <ShieldCheck size={16} />
+                            </span>
+                        )}
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={logout}
+                        className="lms-logout-button"
+                    >
+                        <LogOut size={17} />
+                        <span>Sign out</span>
                     </button>
                 </div>
             </aside>
 
-            {/* Content Area */}
-            <div className="flex-1 flex flex-col overflow-hidden">
-                <header className="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between shadow-sm">
-                    <span className="font-semibold text-lms-textMain capitalize">{activeTab} Section</span>
-                    <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-lms-success rounded-full text-xs font-semibold">
-                        <span className="w-2 h-2 rounded-full bg-lms-success animate-pulse"></span>
-                        Backend Online
+            <div className="lms-main">
+                <header className="lms-topbar">
+                    <div className="lms-topbar-left">
+                        <button
+                            type="button"
+                            className="lms-mobile-menu"
+                            aria-label="Open navigation menu"
+                            onClick={() => setSidebarOpen(true)}
+                        >
+                            <Menu size={22} />
+                        </button>
+
+                        <div className="lms-page-heading">
+                            <div className="lms-breadcrumb">
+                                <span>Workspace</span>
+                                <ChevronRight size={14} />
+
+                                <span className="lms-breadcrumb-current">
+                                    {activeItem.label}
+                                </span>
+                            </div>
+
+                            <h2>{activeItem.label}</h2>
+                        </div>
+                    </div>
+
+                    <div className="lms-topbar-right">
+                        <div className="lms-system-status">
+                            <span className="lms-status-dot" />
+                            <span>Workspace</span>
+                        </div>
+
+                        <div className="lms-topbar-divider" />
+
+                        <button
+                            type="button"
+                            className="lms-header-icon"
+                            aria-label="Notifications"
+                            title="Notifications"
+                            onClick={() => {
+                                // Notifications can be connected later.
+                            }}
+                        >
+                            <Bell size={19} />
+                        </button>
+
+                        <button
+                            type="button"
+                            className="lms-topbar-user"
+                            onClick={() => handleNavigation('profile')}
+                            title="Open your profile"
+                            aria-label="Open your profile"
+                        >
+                            <div className="lms-avatar lms-avatar-small">
+                                {initials}
+                            </div>
+                        </button>
                     </div>
                 </header>
-                <main className="flex-1 overflow-y-auto">{children}</main>
+
+                <main className="lms-content">{children}</main>
+
+                <footer className="lms-footer">
+                    <span>
+                        <strong>ModuFlow</strong> · Logistics Management
+                        System
+                    </span>
+
+                    <span>Built for smoother operations.</span>
+                </footer>
             </div>
         </div>
     );
 };
 
 export default LmsLayout;
+

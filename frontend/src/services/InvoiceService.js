@@ -2,26 +2,30 @@ import axios from 'axios';
 
 const API_BASE = 'http://localhost:8080/invoices';
 
+const invoiceApi = axios.create({
+    baseURL: API_BASE,
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+});
 
 export async function getInvoices() {
-    const response = await axios.get(`${API_BASE}/getall`);
+    const response = await invoiceApi.get('/getall');
     return response.data;
 }
-
 
 export async function createInvoice(invoice) {
-    const response = await axios.post(`${API_BASE}/create`, invoice);
+    const response = await invoiceApi.post('/create', invoice);
     return response.data;
 }
-
 
 export async function updateInvoice(invoice) {
-    // Notice this uses POST to match your Java @PostMapping
-    const response = await axios.post(`${API_BASE}/update`, invoice);
+    const response = await invoiceApi.post('/update', invoice);
     return response.data;
 }
 
-
 export async function deleteInvoice(id) {
-    await axios.delete(`${API_BASE}/delete/${id}`);
+    await invoiceApi.delete(`/delete/${id}`);
 }

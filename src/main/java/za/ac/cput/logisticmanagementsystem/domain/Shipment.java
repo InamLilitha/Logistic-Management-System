@@ -1,45 +1,51 @@
 package za.ac.cput.logisticmanagementsystem.domain;
-import jakarta.persistence.*;
+        /*
+         * Shipment.java
+         * Author: Inam Ngqokomashe
+         * 222660155
+         */
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 import java.time.LocalDate;
 
-/**
- * Shipment.java
- * Author: Inam Ngqokomashe
- * 222660155
- */
 @Entity
 @Table(name = "shipment")
-
 public class Shipment {
+
     @Id
+    @Column(name = "shipment_id", nullable = false)
     private String shipmentId;
 
-    @Column(nullable = false)
+    @Column(name = "weight", nullable = false)
     private double weight;
 
-    @Column(nullable = false)
+    @Column(name = "origin", nullable = false)
     private String origin;
 
-    @Column(nullable = false)
+    @Column(name = "destination", nullable = false)
     private String destination;
 
-    @Column(nullable = false)
+    @Column(name = "dispatch_date", nullable = false)
     private LocalDate dispatchDate;
 
-    @Column(nullable = false)
+    @Column(name = "estimated_delivery_date", nullable = false)
     private LocalDate estimatedDeliveryDate;
 
-    @Column(nullable = false)
+    @Column(name = "cargo_type", nullable = false)
     private String cargoType;
 
-    /*
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "inventory_Id")
-    private Inventory inventory;*/
+    @Column(name = "inventory_id")
+    private String inventoryId;
 
-    protected Shipment(){
+    @Column(name = "contract_id")
+    private String contractId;
+
+    protected Shipment() {
+        // Required by JPA
     }
-
 
     public Shipment(Builder builder) {
         this.shipmentId = builder.shipmentId;
@@ -49,8 +55,8 @@ public class Shipment {
         this.dispatchDate = builder.dispatchDate;
         this.estimatedDeliveryDate = builder.estimatedDeliveryDate;
         this.cargoType = builder.cargoType;
-        //this.inventory = builder.inventory;
-
+        this.inventoryId = builder.inventoryId;
+        this.contractId = builder.contractId;
     }
 
     public String getShipmentId() {
@@ -81,25 +87,31 @@ public class Shipment {
         return cargoType;
     }
 
-  /*
-    public Inventory getInventory() {
-        return inventory;
-    }*/
+    public String getInventoryId() {
+        return inventoryId;
+    }
+
+    public String getContractId() {
+        return contractId;
+    }
 
     @Override
     public String toString() {
         return "Shipment{" +
                 "shipmentId='" + shipmentId + '\'' +
-                ", weight=" + weight + " Kg" +
+                ", weight=" + weight +
                 ", origin='" + origin + '\'' +
                 ", destination='" + destination + '\'' +
                 ", dispatchDate=" + dispatchDate +
                 ", estimatedDeliveryDate=" + estimatedDeliveryDate +
                 ", cargoType='" + cargoType + '\'' +
+                ", inventoryId='" + inventoryId + '\'' +
+                ", contractId='" + contractId + '\'' +
                 '}';
     }
 
     public static class Builder {
+
         private String shipmentId;
         private double weight;
         private String origin;
@@ -107,29 +119,34 @@ public class Shipment {
         private LocalDate dispatchDate;
         private LocalDate estimatedDeliveryDate;
         private String cargoType;
-        //private Inventory inventory;
-
+        private String inventoryId;
+        private String contractId;
 
         public Builder shipmentId(String shipmentId) {
             this.shipmentId = shipmentId;
             return this;
         }
+
         public Builder weight(double weight) {
             this.weight = weight;
             return this;
         }
+
         public Builder origin(String origin) {
             this.origin = origin;
             return this;
         }
+
         public Builder destination(String destination) {
             this.destination = destination;
             return this;
         }
+
         public Builder dispatchDate(LocalDate dispatchDate) {
             this.dispatchDate = dispatchDate;
             return this;
         }
+
         public Builder estimatedDeliveryDate(LocalDate estimatedDeliveryDate) {
             this.estimatedDeliveryDate = estimatedDeliveryDate;
             return this;
@@ -139,14 +156,33 @@ public class Shipment {
             this.cargoType = cargoType;
             return this;
         }
-       /*
-        }
-        public Builder inventory(Inventory inventory){
-            this.inventory = inventory;
+
+        public Builder inventoryId(String inventoryId) {
+            this.inventoryId = inventoryId;
             return this;
-        }*/
+        }
+
+        public Builder contractId(String contractId) {
+            this.contractId = contractId;
+            return this;
+        }
+
+        public Builder copy(Shipment shipment) {
+            this.shipmentId = shipment.shipmentId;
+            this.weight = shipment.weight;
+            this.origin = shipment.origin;
+            this.destination = shipment.destination;
+            this.dispatchDate = shipment.dispatchDate;
+            this.estimatedDeliveryDate = shipment.estimatedDeliveryDate;
+            this.cargoType = shipment.cargoType;
+            this.inventoryId = shipment.inventoryId;
+            this.contractId = shipment.contractId;
+            return this;
+        }
+
         public Shipment build() {
             return new Shipment(this);
         }
     }
 }
+

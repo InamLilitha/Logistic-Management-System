@@ -17,6 +17,7 @@ public class StaffProfileDataInitializer {
             if (!repository.existsByUsername("admin")) {
                 repository.save(new StaffProfile(
                         "admin",
+                        "admin@lms.com",
                         "System Administrator",
                         passwordEncoder.encode("admin123"),
                         "ADMIN"

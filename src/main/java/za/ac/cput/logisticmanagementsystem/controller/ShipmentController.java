@@ -11,8 +11,7 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000")
 public class ShipmentController {
 
-
-    private ShipmentService service;
+    private final ShipmentService service;
 
     public ShipmentController(ShipmentService service) {
         this.service = service;
@@ -20,11 +19,16 @@ public class ShipmentController {
 
     @PostMapping("/create")
     public Shipment createShipment(@RequestBody Shipment shipment) {
+
+        System.out.println("Received shipment: " + shipment);
+        System.out.println("Inventory ID: " + shipment.getInventoryId());
+        System.out.println("Contract ID: " + shipment.getContractId());
+
         return service.create(shipment);
     }
 
     @GetMapping("/{id}")
-    public Shipment read(@PathVariable String id){
+    public Shipment read(@PathVariable String id) {
         return service.read(id);
     }
 
@@ -43,3 +47,4 @@ public class ShipmentController {
         service.delete(id);
     }
 }
+

@@ -27,14 +27,17 @@ export function AuthProvider({ children }) {
       localStorage.removeItem(SESSION_KEY);
       setCurrentUser(null);
     },
-    async createStaff(profile) {
-      return createStaffRequest({
-        ...profile,
-        name: profile.name.trim(),
-        username: profile.username.trim(),
-      });
-    },
-  }), [currentUser]);
+async createStaff(profile) {
+  return createStaffRequest({
+    ...profile,
+    name: profile.name.trim(),
+    username: profile.username.trim(),
+    email: profile.email.trim(),
+  });
+},
+
+
+}), [currentUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

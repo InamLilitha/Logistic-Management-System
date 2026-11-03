@@ -11,7 +11,7 @@ import java.util.Date;
  * InvoiceFactoryTest.java
  * Test class for InvoiceFactory
  * Author: Tebogo Pii 230226442
- * Date: 26-27 July 2026
+ * Date: 26-27 July 2026 / Updated: November 2026
  */
 
 public class InvoiceFactoryTest {
@@ -24,6 +24,34 @@ public class InvoiceFactoryTest {
         assertNotNull(invoice.getInvoiceId());
         assertEquals(1500.00, invoice.getTotal());
         assertEquals("Paid", invoice.getPaymentStatus());
+    }
+
+    @Test
+    void testBuildInvoiceWithShipmentAndCompanySuccess() {
+        Date dateIssued = new Date();
+        Date dueDate = new Date(dateIssued.getTime() + (14L * 24 * 60 * 60 * 1000));
+        Invoice invoice = InvoiceFactory.buildInvoice(
+                "SHP-001",
+                "CMP-001",
+                "Acme Corp",
+                "Freight charges for bulk shipment",
+                4500.00,
+                "Unpaid",
+                dateIssued,
+                dueDate
+        );
+
+        assertNotNull(invoice);
+        assertNotNull(invoice.getInvoiceId());
+        assertEquals("SHP-001", invoice.getShipmentId());
+        assertEquals("CMP-001", invoice.getCompanyId());
+        assertEquals("Acme Corp", invoice.getCustomerName());
+        assertEquals("Freight charges for bulk shipment", invoice.getDescription());
+        assertEquals(4500.00, invoice.getTotal());
+        assertEquals(4500.00, invoice.getTotalAmount());
+        assertEquals("Unpaid", invoice.getPaymentStatus());
+        assertEquals(dateIssued, invoice.getDateIssued());
+        assertEquals(dueDate, invoice.getDueDate());
     }
 
     @Test
@@ -55,5 +83,3 @@ public class InvoiceFactoryTest {
         assertNotEquals(invoice1.getInvoiceId(), invoice2.getInvoiceId());
     }
 }
-
-

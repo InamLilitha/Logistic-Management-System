@@ -1,4 +1,3 @@
-
 /* 24/08/2026
  * App.jsx
  * Logistic Management System
@@ -17,15 +16,14 @@ import Shipments from './pages/Shipments.jsx';
 import ShipmentTracking from './pages/ShipmentTracking.jsx';
 
 import Login from './auth/Login.jsx';
-import CompanyRegister from './pages/CompanyRegister.jsx';
 import UserManagement from './auth/UserManagement.jsx';
 import Profile from './auth/Profile.jsx';
 
 import { useAuth } from './auth/AuthContext';
 
 function App() {
+
     const [activeTab, setActiveTab] = useState('home');
-    const [showRegister, setShowRegister] = useState(false);
 
     const { currentUser, isAdmin, logout } = useAuth();
 
@@ -34,21 +32,17 @@ function App() {
     ).has('token');
 
     if (hasResetToken) {
-        return <Login onRegister={() => setShowRegister(true)} />;
+        return <Login />;
     }
 
+
     if (!currentUser) {
-        return showRegister ? (
-            <CompanyRegister
-                onBackToLogin={() => setShowRegister(false)}
-            />
-        ) : (
-            <Login onRegister={() => setShowRegister(true)} />
-        );
+        return <Login />;
     }
 
     const renderContent = () => {
         switch (activeTab) {
+
             case 'companies':
                 return <Companies canEdit={isAdmin} />;
 

@@ -1,5 +1,6 @@
 package za.ac.cput.logisticmanagementsystem.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,9 +25,9 @@ public class StaffProfile {
     @Column(nullable = false, length = 120)
     private String name;
 
-    @Column(name = "password_hash", nullable = false, length = 100)
+    @JsonIgnore
+    @Column(name = "password_hash")
     private String passwordHash;
-
     @Column(nullable = false, length = 20)
     private String role;
 

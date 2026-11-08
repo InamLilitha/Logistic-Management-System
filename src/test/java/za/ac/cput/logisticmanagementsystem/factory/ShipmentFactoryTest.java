@@ -1,6 +1,7 @@
 package za.ac.cput.logisticmanagementsystem.factory;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
 import za.ac.cput.logisticmanagementsystem.domain.Shipment;
 
@@ -11,15 +12,17 @@ import java.time.LocalDate;
  * Author: Inam Ngqokomashe
  * 222660155
  */
-
 public class ShipmentFactoryTest {
 
     @Test
     public void testCreateValidShipment() {
+
         LocalDate dispatchDate = LocalDate.now();
+
         Shipment shipment = ShipmentFactory.createShipment(
                 450.0,
-                "Cape Town", "Johannesburg",
+                "Cape Town",
+                "Johannesburg",
                 dispatchDate,
                 "General Cargo"
         );
@@ -27,91 +30,130 @@ public class ShipmentFactoryTest {
         assertNotNull(shipment);
         assertNotNull(shipment.getShipmentId());
         assertTrue(shipment.getShipmentId().startsWith("SHIP-"));
+
         assertEquals(450.0, shipment.getWeight());
         assertEquals("Cape Town", shipment.getOrigin());
         assertEquals("Johannesburg", shipment.getDestination());
         assertEquals(dispatchDate, shipment.getDispatchDate());
-        assertEquals(dispatchDate.plusDays(12), shipment.getEstimatedDeliveryDate());
 
+        assertEquals(
+                dispatchDate.plusDays(12),
+                shipment.getEstimatedDeliveryDate()
+        );
+
+        assertEquals("General Cargo", shipment.getCargoType());
+
+        // Relationships are optional in this factory overload
+        assertNull(shipment.getCompany());
+        assertNull(shipment.getContract());
+        assertNull(shipment.getCreatedByStaff());
     }
 
+    @Test
+    public void testCreateShipmentWithNegativeWeight() {
 
-   @Test
-   public void testCreateShipmentWithNegativeWeight(){
-        Exception exception = assertThrows(IllegalArgumentException.class, () ->
-                ShipmentFactory.createShipment(
-                -45.0,
-                "Cape Town",
-                "Johannesburg",
+        Exception exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> ShipmentFactory.createShipment(
+                        -45.0,
+                        "Cape Town",
+                        "Johannesburg",
                         LocalDate.now(),
                         "General Cargo"
-                ));
-
-        assertEquals("Weight has to be greater than zero", exception.getMessage());
-   }
-   @Test
-   public void testCreateInvalidOrigin(){
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-        ShipmentFactory.createShipment(
-                450.0,
-                "",
-                "Johannesburg",
-                LocalDate.now(),
-                "General Cargo"
-        )
+                )
         );
 
-        assertEquals("Origin has to be specified", exception.getMessage());
-   }
+        assertEquals(
+                "Weight has to be greater than zero",
+                exception.getMessage()
+        );
+    }
 
-   @Test
-    public void testCreateShipment_InvalidDestination(){
-       IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-        ShipmentFactory.createShipment(
-                450.0,
-                "Cape Town",
-                "",
-                LocalDate.now(),
-                "General Cargo"
-        )
+    @Test
+    public void testCreateInvalidOrigin() {
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> ShipmentFactory.createShipment(
+                        450.0,
+                        "",
+                        "Johannesburg",
+                        LocalDate.now(),
+                        "General Cargo"
+                )
         );
 
-        assertEquals("Destination has to be specified", exception.getMessage());
-   }
+        assertEquals(
+                "Origin has to be specified",
+                exception.getMessage()
+        );
+    }
 
-   @Test
-   public void testCreateShipment_SameOriginAndDestination(){
-       IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-        ShipmentFactory.createShipment(
-                450.0,
-                "Cape Town",
-                "Cape Town",
-                LocalDate.now(),
-                "General Cargo"
-        )
+    @Test
+    public void testCreateShipment_InvalidDestination() {
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> ShipmentFactory.createShipment(
+                        450.0,
+                        "Cape Town",
+                        "",
+                        LocalDate.now(),
+                        "General Cargo"
+                )
         );
 
-        assertEquals("Origin and destination cannot be the same", exception.getMessage());
-   }
+        assertEquals(
+                "Destination has to be specified",
+                exception.getMessage()
+        );
+    }
 
-   @Test
-   public void testCreateShipment_InvalidDispatchDate(){
-       IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-        ShipmentFactory.createShipment(
-                450.0,
-                "Cape Town",
-                "Johannesburg",
-                null,
-                "General Cargo"
-        )
+    @Test
+    public void testCreateShipment_SameOriginAndDestination() {
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> ShipmentFactory.createShipment(
+                        450.0,
+                        "Cape Town",
+                        "Cape Town",
+                        LocalDate.now(),
+                        "General Cargo"
+                )
         );
 
-        assertEquals("Dispatch date is required", exception.getMessage());
-   }
+        assertEquals(
+                "Origin and destination cannot be the same",
+                exception.getMessage()
+        );
+    }
 
-   @Test
-    public void testEstimateDeliveryDateGeneratedAutomatically(){
+    @Test
+    public void testCreateShipment_InvalidDispatchDate() {
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> ShipmentFactory.createShipment(
+                        450.0,
+                        "Cape Town",
+                        "Johannesburg",
+                        null,
+                        "General Cargo"
+                )
+        );
+
+        assertEquals(
+                "Dispatch date is required",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testEstimateDeliveryDateGeneratedAutomatically() {
+
         LocalDate dispatchDate = LocalDate.of(2026, 7, 19);
+
         Shipment shipment = ShipmentFactory.createShipment(
                 450.0,
                 "Cape Town",
@@ -119,15 +161,19 @@ public class ShipmentFactoryTest {
                 dispatchDate,
                 "General Cargo"
         );
-        assertEquals(LocalDate.of(2026, 7, 30),
-                shipment.getEstimatedDeliveryDate());
 
-   }
+        assertEquals(
+                LocalDate.of(2026, 7, 31),
+                shipment.getEstimatedDeliveryDate()
+        );
+    }
 
-   @Test
-    public void testCreateShipment_InvalidCargoType(){
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                ShipmentFactory.createShipment(
+    @Test
+    public void testCreateShipment_InvalidCargoType() {
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> ShipmentFactory.createShipment(
                         450.0,
                         "Cape Town",
                         "Johannesburg",
@@ -136,7 +182,10 @@ public class ShipmentFactoryTest {
                 )
         );
 
-        assertEquals("Invalid cargo type. Must be 'General Cargo', 'Perishable Goods', or 'Hazardous Materials'", exception.getMessage());
+        assertEquals(
+                "Invalid cargo type. Must be General Cargo, Fragile, " +
+                        "Perishable Goods, or Hazardous Materials",
+                exception.getMessage()
+        );
     }
-
-}//
+}

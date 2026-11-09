@@ -1,12 +1,14 @@
 package za.ac.cput.logisticmanagementsystem.factory;
 
+import za.ac.cput.logisticmanagementsystem.domain.CompanyDomain;
 import za.ac.cput.logisticmanagementsystem.domain.Shipment;
+import za.ac.cput.logisticmanagementsystem.domain.ShippingContract;
+import za.ac.cput.logisticmanagementsystem.domain.StaffProfile;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
 /**
-
  * ShipmentFactory.java
  * Author: Inam Ngqokomashe
  * 222660155
@@ -14,9 +16,7 @@ import java.util.UUID;
 public class ShipmentFactory {
 
     private ShipmentFactory() {
-
     }
-
 
     public static Shipment createShipment(
             double weight,
@@ -32,10 +32,10 @@ public class ShipmentFactory {
                 dispatchDate,
                 cargoType,
                 null,
+                null,
                 null
         );
     }
-
 
     public static Shipment createShipment(
             double weight,
@@ -43,8 +43,9 @@ public class ShipmentFactory {
             String destination,
             LocalDate dispatchDate,
             String cargoType,
-            String inventoryId,
-            String contractId) {
+            CompanyDomain company,
+            ShippingContract contract,
+            StaffProfile createdByStaff) {
 
         if (!Double.isFinite(weight) || weight <= 0) {
             throw new IllegalArgumentException(
@@ -87,16 +88,6 @@ public class ShipmentFactory {
 
         String normalizedCargoType = normalizeCargoType(cargoType);
 
-        String normalizedInventoryId = normalizeOptionalId(
-                inventoryId,
-                "Inventory ID"
-        );
-
-        String normalizedContractId = normalizeOptionalId(
-                contractId,
-                "Contract ID"
-        );
-
         LocalDate estimatedDeliveryDate = dispatchDate.plusDays(12);
 
         return new Shipment.Builder()
@@ -107,14 +98,15 @@ public class ShipmentFactory {
                 .dispatchDate(dispatchDate)
                 .estimatedDeliveryDate(estimatedDeliveryDate)
                 .cargoType(normalizedCargoType)
-                .inventoryId(normalizedInventoryId)
-                .contractId(normalizedContractId)
+                .company(company)
+                .contract(contract)
+                .createdByStaff(createdByStaff)
                 .build();
     }
 
     private static String normalizeCargoType(String cargoType) {
-        String normalized = cargoType.trim();
 
+        String normalized = cargoType.trim();
 
         if (normalized.equalsIgnoreCase("General Cargo")) {
             return "General Cargo";
@@ -136,25 +128,10 @@ public class ShipmentFactory {
                 "Invalid cargo type. Must be General Cargo, Fragile, " +
                         "Perishable Goods, or Hazardous Materials"
         );
-
-
-    }
-
-    private static String normalizeOptionalId(
-            String id,
-            String fieldName) {
-
-
-        if (id == null || id.trim().isEmpty()) {
-            return null;
-        }
-
-        return id.trim();
-
-
     }
 
     private static String generateShipmentId() {
+
         return "SHIP-" + UUID.randomUUID()
                 .toString()
                 .replace("-", "")

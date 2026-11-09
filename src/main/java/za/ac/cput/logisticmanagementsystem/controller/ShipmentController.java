@@ -2,7 +2,7 @@ package za.ac.cput.logisticmanagementsystem.controller;
 
 import org.springframework.web.bind.annotation.*;
 import za.ac.cput.logisticmanagementsystem.domain.Shipment;
-import za.ac.cput.logisticmanagementsystem.service.impl.ShipmentService;
+import za.ac.cput.logisticmanagementsystem.service.IShipmentService;
 
 import java.util.List;
 
@@ -11,19 +11,14 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000")
 public class ShipmentController {
 
-    private final ShipmentService service;
+    private final IShipmentService service;
 
-    public ShipmentController(ShipmentService service) {
+    public ShipmentController(IShipmentService service) {
         this.service = service;
     }
 
     @PostMapping("/create")
     public Shipment createShipment(@RequestBody Shipment shipment) {
-
-        System.out.println("Received shipment: " + shipment);
-        System.out.println("Inventory ID: " + shipment.getInventoryId());
-        System.out.println("Contract ID: " + shipment.getContractId());
-
         return service.create(shipment);
     }
 
@@ -47,4 +42,3 @@ public class ShipmentController {
         service.delete(id);
     }
 }
-

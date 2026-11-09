@@ -1,15 +1,27 @@
 package za.ac.cput.logisticmanagementsystem.domain;
-        /*
-         * Shipment.java
-         * Author: Inam Ngqokomashe
-         * 222660155
-         */
+
+/*
+ * Shipment.java
+ * Author: Inam Ngqokomashe
+ * 222660155
+ * Date: 26 July 2026
+ * Date Upated: November 2026
+ */
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "shipment")
@@ -37,14 +49,27 @@ public class Shipment {
     @Column(name = "cargo_type", nullable = false)
     private String cargoType;
 
-    @Column(name = "inventory_id")
-    private String inventoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private CompanyDomain company;
 
-    @Column(name = "contract_id")
-    private String contractId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "contract_id")
+    private ShippingContract contract;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_staff_id", nullable = false)
+    private StaffProfile createdByStaff;
+
+    @JsonManagedReference("shipment-items")
+    @OneToMany(
+            mappedBy = "shipment",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<ShipmentItem> shipmentItems = new ArrayList<>();
 
     protected Shipment() {
-        // Required by JPA
     }
 
     public Shipment(Builder builder) {
@@ -55,8 +80,10 @@ public class Shipment {
         this.dispatchDate = builder.dispatchDate;
         this.estimatedDeliveryDate = builder.estimatedDeliveryDate;
         this.cargoType = builder.cargoType;
-        this.inventoryId = builder.inventoryId;
-        this.contractId = builder.contractId;
+        this.company = builder.company;
+        this.contract = builder.contract;
+        this.createdByStaff = builder.createdByStaff;
+        this.shipmentItems = builder.shipmentItems;
     }
 
     public String getShipmentId() {
@@ -87,12 +114,24 @@ public class Shipment {
         return cargoType;
     }
 
-    public String getInventoryId() {
-        return inventoryId;
+    public CompanyDomain getCompany() {
+        return company;
     }
 
-    public String getContractId() {
-        return contractId;
+    public ShippingContract getContract() {
+        return contract;
+    }
+
+    public StaffProfile getCreatedByStaff() {
+        return createdByStaff;
+    }
+
+    public List<ShipmentItem> getShipmentItems() {
+        return shipmentItems;
+    }
+
+    public void setShipmentItems(List<ShipmentItem> shipmentItems) {
+        this.shipmentItems = shipmentItems;
     }
 
     @Override
@@ -105,8 +144,9 @@ public class Shipment {
                 ", dispatchDate=" + dispatchDate +
                 ", estimatedDeliveryDate=" + estimatedDeliveryDate +
                 ", cargoType='" + cargoType + '\'' +
-                ", inventoryId='" + inventoryId + '\'' +
-                ", contractId='" + contractId + '\'' +
+                ", company=" + (company != null ? company.getCompanyId() : null) +
+                ", contract=" + (contract != null ? contract.getContractId() : null) +
+                ", createdByStaff=" + (createdByStaff != null ? createdByStaff.getId() : null) +
                 '}';
     }
 
@@ -119,8 +159,10 @@ public class Shipment {
         private LocalDate dispatchDate;
         private LocalDate estimatedDeliveryDate;
         private String cargoType;
-        private String inventoryId;
-        private String contractId;
+        private CompanyDomain company;
+        private ShippingContract contract;
+        private StaffProfile createdByStaff;
+        private List<ShipmentItem> shipmentItems = new ArrayList<>();
 
         public Builder shipmentId(String shipmentId) {
             this.shipmentId = shipmentId;
@@ -157,13 +199,23 @@ public class Shipment {
             return this;
         }
 
-        public Builder inventoryId(String inventoryId) {
-            this.inventoryId = inventoryId;
+        public Builder company(CompanyDomain company) {
+            this.company = company;
             return this;
         }
 
-        public Builder contractId(String contractId) {
-            this.contractId = contractId;
+        public Builder contract(ShippingContract contract) {
+            this.contract = contract;
+            return this;
+        }
+
+        public Builder createdByStaff(StaffProfile createdByStaff) {
+            this.createdByStaff = createdByStaff;
+            return this;
+        }
+
+        public Builder shipmentItems(List<ShipmentItem> shipmentItems) {
+            this.shipmentItems = shipmentItems;
             return this;
         }
 
@@ -175,8 +227,11 @@ public class Shipment {
             this.dispatchDate = shipment.dispatchDate;
             this.estimatedDeliveryDate = shipment.estimatedDeliveryDate;
             this.cargoType = shipment.cargoType;
-            this.inventoryId = shipment.inventoryId;
-            this.contractId = shipment.contractId;
+            this.company = shipment.company;
+            this.contract = shipment.contract;
+            this.createdByStaff = shipment.createdByStaff;
+            this.shipmentItems = shipment.shipmentItems;
+
             return this;
         }
 
@@ -185,4 +240,3 @@ public class Shipment {
         }
     }
 }
-

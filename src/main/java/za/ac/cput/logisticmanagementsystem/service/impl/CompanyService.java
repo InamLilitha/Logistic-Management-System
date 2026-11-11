@@ -36,6 +36,7 @@ public class CompanyService implements ICompanyService {
         }
         CompanyDomain validCompany = CompanyFactory.createCompanyDomain(
                 companyDomain.getCompanyName(),
+                companyDomain.getCompanyType(),
                 companyDomain.getTaxId(),
                 companyDomain.getPhoneNumber(),
                 companyDomain.getEmailAddress()
@@ -59,6 +60,7 @@ public class CompanyService implements ICompanyService {
         }
         CompanyDomain validCompany = CompanyFactory.createCompanyDomain(
                 companyDomain.getCompanyName(),
+                companyDomain.getCompanyType(),
                 companyDomain.getTaxId(),
                 companyDomain.getPhoneNumber(),
                 companyDomain.getEmailAddress()

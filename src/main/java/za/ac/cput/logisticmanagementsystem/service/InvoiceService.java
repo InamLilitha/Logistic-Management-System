@@ -45,17 +45,20 @@ public class InvoiceService implements IInvoiceService {
 
     @Override
     public Invoice read(String invoiceId) {
+        if (invoiceId == null || invoiceId.isBlank()) return null;
         return invoiceRepository.findById(invoiceId).orElse(null);
     }
 
     @Override
     public Invoice update(Invoice invoice) {
-        if (invoice == null) return null;
+        if (invoice == null || invoice.getInvoiceId() == null
+                || invoice.getInvoiceId().isBlank()) return null;
         return invoiceRepository.save(invoice);
     }
 
     @Override
     public boolean delete(String invoiceId) {
+        if (invoiceId == null || invoiceId.isBlank()) return false;
         if (invoiceRepository.existsById(invoiceId)) {
             invoiceRepository.deleteById(invoiceId);
             return true;
@@ -118,18 +121,26 @@ public class InvoiceService implements IInvoiceService {
     @Override
     public Invoice generateFromShipment(String shipmentId, String companyId,
                                         String description, int paymentTermDays) {
+        if (shipmentId == null || shipmentId.isBlank() || paymentTermDays < 0) {
+            return null;
+        }
+
         Shipment shipment = shipmentRepository.findById(shipmentId).orElse(null);
         if (shipment == null) return null;
 
-        String contractId = shipment.getContractId();
-        if (contractId == null || contractId.isBlank()) return null;
-
-        ShippingContract contract = contractRepository.findById(contractId).orElse(null);
+        ShippingContract contract = shipment.getContract();
         if (contract == null) return null;
 
         if (invoiceRepository.existsByShipmentId(shipmentId)) return null;
 
-        double totalAmount = shipment.getWeight() * contract.getPricePerKg();
+        if (!Double.isFinite(shipment.getWeight()) || shipment.getWeight() <= 0
+                || contract.getPricePerKg() == null
+                || !Double.isFinite(contract.getPricePerKg())
+                || contract.getPricePerKg() <= 0) {
+            return null;
+        }
+
+        double totalAmount = contract.calculateTotalCost(shipment.getWeight());
         Date now     = new Date();
         Date dueDate = new Date(now.getTime() + ((long) paymentTermDays * 24 * 60 * 60 * 1000));
 

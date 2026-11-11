@@ -63,23 +63,23 @@ public class InvoiceServiceTest {
     void setUp() {
         sampleInvoice = InvoiceFactory.buildInvoice(2500.50, "Unpaid", new Date());
 
-        sampleShipment = new Shipment.Builder()
-                .shipmentId(SHIPMENT_ID)
-                .weight(WEIGHT_KG)
-                .contractId(CONTRACT_ID)
-                .origin("Cape Town")
-                .destination("Johannesburg")
-                .dispatchDate(LocalDate.now())
-                .estimatedDeliveryDate(LocalDate.now().plusDays(3))
-                .cargoType("General Cargo")
-                .build();
-
         sampleContract = new ShippingContract.Builder()
                 .setContractId(CONTRACT_ID)
                 .setContractNumber("CON-2026-001")
                 .setPricePerKgString(PRICE_PER_KG)
                 .setContractStartDate(LocalDate.now().minusDays(30))
                 .setContractExpiryDate(LocalDate.now().plusDays(335))
+                .build();
+
+        sampleShipment = new Shipment.Builder()
+                .shipmentId(SHIPMENT_ID)
+                .weight(WEIGHT_KG)
+                .contract(sampleContract)
+                .origin("Cape Town")
+                .destination("Johannesburg")
+                .dispatchDate(LocalDate.now())
+                .estimatedDeliveryDate(LocalDate.now().plusDays(3))
+                .cargoType("General Cargo")
                 .build();
     }
 
@@ -304,7 +304,7 @@ public class InvoiceServiceTest {
     void generateFromShipment_returnsNull_whenContractNotFound() {
         // Shipment with no contract id
         Shipment noContract = new Shipment.Builder()
-                .shipmentId(SHIPMENT_ID).weight(50).contractId(null)
+                .shipmentId(SHIPMENT_ID).weight(50)
                 .origin("CPT").destination("JHB")
                 .dispatchDate(LocalDate.now())
                 .estimatedDeliveryDate(LocalDate.now().plusDays(2))

@@ -1,4 +1,4 @@
-/* 27/07/2026
+/* last Time worked on Wednesday 11/11/2026 04:03
  *CompanyDomain.java
  *CompanyDomain model class in domain folder
  *Maghdie Petersen 230600204
@@ -17,6 +17,7 @@ public class CompanyDomain implements Serializable{
     @Id
     private String companyId;
     private String companyName;
+    private String companyType;
     private String taxId;
     private String phoneNumber;
     private String emailAddress;
@@ -27,6 +28,7 @@ public class CompanyDomain implements Serializable{
     private CompanyDomain(Builder builder) {
         this.companyId=builder.companyId;
         this.companyName=builder.companyName;
+        this.companyType=builder.companyType;
         this.taxId=builder.taxId;
         this.phoneNumber=builder.phoneNumber;
         this.emailAddress=builder.emailAddress;
@@ -39,6 +41,10 @@ public class CompanyDomain implements Serializable{
 
     public String getCompanyName() {
         return companyName;
+    }
+
+    public String getCompanyType() {
+        return companyType;
     }
 
     public String getTaxId() {
@@ -75,6 +81,7 @@ public class CompanyDomain implements Serializable{
         return "CompanyDomain{" +
                 "companyId='" + companyId + '\'' +
                 ", companyName='" + companyName + '\'' +
+                ", companyType='" + companyType + '\'' +
                 ", taxId='" + taxId + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", emailAddress='" + emailAddress + '\'' +
@@ -85,6 +92,7 @@ public class CompanyDomain implements Serializable{
     public static class Builder{
         private String companyId;
         private String companyName;
+        private String companyType;
         private String taxId;
         private String phoneNumber;
         private String emailAddress;
@@ -97,6 +105,11 @@ public class CompanyDomain implements Serializable{
 
         public Builder setCompanyName(String companyName) {
             this.companyName = companyName;
+            return this;
+        }
+
+        public Builder setCompanyType(String companyType) {
+            this.companyType = companyType;
             return this;
         }
 
@@ -123,6 +136,7 @@ public class CompanyDomain implements Serializable{
         public Builder copy(CompanyDomain companyDomain){
             this.companyId=companyDomain.companyId;
             this.companyName=companyDomain.companyName;
+            this.companyType=companyDomain.companyType;
             this.taxId=companyDomain.taxId;
             this.phoneNumber=companyDomain.phoneNumber;
             this.emailAddress=companyDomain.emailAddress;

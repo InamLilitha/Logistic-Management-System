@@ -12,7 +12,7 @@ const badgeStyle = {
   'Expired': 'bg-red-50 text-lms-danger',
 };
 
-const Contracts = () => {
+const Contracts = ({ canEdit = true }) => {
   const [contracts, setContracts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState(emptyForm);
@@ -89,7 +89,7 @@ const Contracts = () => {
     <div className="p-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form */}
-        <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm h-fit">
+        {canEdit && <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm h-fit">
           <h2 className="text-lg font-bold text-lms-textMain mb-4 flex items-center gap-2">
             <Plus className="w-5 h-5 text-lms-action" /> Add Contract
           </h2>
@@ -105,7 +105,7 @@ const Contracts = () => {
             {error && !editingContract && <p className="text-sm text-lms-danger">{error}</p>}
             <button type="submit" className="w-full bg-lms-action text-white py-2.5 rounded text-sm font-medium">Save Contract</button>
           </form>
-        </div>
+        </div>}
 
         {/* Table */}
         <div className="lg:col-span-2 bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
@@ -137,8 +137,8 @@ const Contracts = () => {
                     <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${badgeStyle[status]}`}>{status}</span>
                   </td>
                   <td className="p-3 text-right space-x-1">
-                    <button onClick={() => { setError(''); setEditingContract(c); }} className="text-amber-600 p-1.5"><Edit3 className="w-4 h-4"/></button>
-                    <button onClick={() => handleDelete(c.contractId)} className="text-lms-danger p-1.5"><Trash2 className="w-4 h-4"/></button>
+                    {canEdit && <button onClick={() => { setError(''); setEditingContract(c); }} className="text-amber-600 p-1.5"><Edit3 className="w-4 h-4"/></button>}
+                    {canEdit && <button onClick={() => handleDelete(c.contractId)} className="text-lms-danger p-1.5"><Trash2 className="w-4 h-4"/></button>}
                   </td>
                 </tr>
               );
@@ -152,7 +152,7 @@ const Contracts = () => {
       </div>
 
       {/* Edit Modal */}
-      {editingContract && (
+      {canEdit && editingContract && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h3 className="text-lg font-bold mb-4">Edit Contract</h3>

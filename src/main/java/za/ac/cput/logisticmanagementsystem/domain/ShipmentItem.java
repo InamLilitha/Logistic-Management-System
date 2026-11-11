@@ -1,45 +1,102 @@
 package za.ac.cput.logisticmanagementsystem.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
+/*
+ * ShipmentItem.java
+ * Author: Inam Ngqokomashe
+ * 222660155
+ * Date: 05 November 2026
+ */
 
-@Embeddable
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "shipment_item")
 public class ShipmentItem {
 
-    @Column(name = "inventory_id", nullable = false)
-    private String inventoryId;
+    @Id
+    @Column(name = "shipment_item_id", nullable = false)
+    private String shipmentItemId;
 
-    @Column(nullable = false)
-    private String sku;
+    @JsonBackReference("shipment-items")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipment_id", nullable = false)
+    private Shipment shipment;
 
-    @Column(nullable = false)
-    private int quantity;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "inventory_id", nullable = false)
+    private Inventory inventory;
+
+    @Column(name = "quantity_shipped", nullable = false)
+    private int quantityShipped;
 
     protected ShipmentItem() {
     }
 
-    @JsonCreator
-    public ShipmentItem(
-            @JsonProperty("inventoryId") String inventoryId,
-            @JsonProperty("sku") String sku,
-            @JsonProperty("quantity") int quantity
-    ) {
-        this.inventoryId = inventoryId;
-        this.sku = sku;
-        this.quantity = quantity;
+    public ShipmentItem(Builder builder) {
+
+        this.shipmentItemId = builder.shipmentItemId;
+        this.shipment = builder.shipment;
+        this.inventory = builder.inventory;
+        this.quantityShipped = builder.quantityShipped;
     }
 
-    public String getInventoryId() {
-        return inventoryId;
+    public String getShipmentItemId() {
+        return shipmentItemId;
     }
 
-    public String getSku() {
-        return sku;
+    public Shipment getShipment() {
+        return shipment;
     }
 
-    public int getQuantity() {
-        return quantity;
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    public int getQuantityShipped() {
+        return quantityShipped;
+    }
+
+    @Override
+    public String toString() {
+        return "ShipmentItem{" +
+                "shipmentItemId='" + shipmentItemId + '\'' +
+                ", inventory=" +
+                inventory +
+                ", quantityShipped=" +
+                quantityShipped +
+                '}';
+    }
+
+    public static class Builder {
+
+        private String shipmentItemId;
+        private Shipment shipment;
+        private Inventory inventory;
+        private int quantityShipped;
+
+        public Builder shipmentItemId(String shipmentItemId) {
+            this.shipmentItemId = shipmentItemId;
+            return this;
+        }
+
+        public Builder shipment(Shipment shipment) {
+            this.shipment = shipment;
+            return this;
+        }
+
+        public Builder inventory(Inventory inventory) {
+            this.inventory = inventory;
+            return this;
+        }
+
+        public Builder quantityShipped(int quantityShipped) {
+            this.quantityShipped = quantityShipped;
+            return this;
+        }
+
+        public ShipmentItem build() {
+            return new ShipmentItem(this);
+        }
     }
 }

@@ -13,6 +13,10 @@
 
 ## Entity Relationship Diagram (ERD)
 
+An interactive viewer is available at [`erd.html`](erd.html) and a standalone high-resolution vector image at [`erd.svg`](erd.svg).
+
+![Logistic Management System ERD](erd.svg)
+
 ```mermaid
 
 ## Inventory and shipment stock
@@ -21,71 +25,103 @@ The inventory page flags items with 10 or fewer units, separately calls out zero
 
 Shipment creation can include inventory item IDs and quantities. Stock is checked and deducted transactionally when the shipment is created; a request that exceeds available stock is rejected without creating the shipment or partially deducting stock.mermaid
 erDiagram
-    Company ||--|| Inventory : "owns"
-    Company ||--|| ShippingContract : "holds"
-    Inventory ||--o{ ShipmentItem : "selected for"
-    Shipment ||--|{ ShipmentItem : "contains"
-    ShippingContract ||--|| Shipment : "applies to"
-    Shipment ||--|| ShipmentTracking : "tracked by"
-    Shipment ||--|| Invoice : "generates"
+    STAFF_PROFILES ||--o{ PASSWORD_RESET_REQUESTS : "initiates"
+    STAFF_PROFILES ||--o{ SHIPMENT : "manages"
+    COMPANY_DOMAIN ||--o{ INVENTORY : "owns_supplies"
+    COMPANY_DOMAIN ||--o{ SHIPPING_CONTRACT : "holds"
+    COMPANY_DOMAIN ||--o{ SHIPMENT : "client_or_carrier"
+    SHIPPING_CONTRACT ||--o{ SHIPMENT : "governs"
+    SHIPMENT ||--o{ SHIPMENT_ITEM : "contains"
+    INVENTORY ||--o{ SHIPMENT_ITEM : "allocated_to"
+    SHIPMENT ||--o| SHIPMENT_TRACKING : "tracked_by"
+    SHIPMENT ||--o{ INVOICE : "billed_as"
 
-    Company {
-        String companyId PK
-        String companyName
-        String taxId
-        String phoneNumber
-        String emailAddress
-        boolean isActive
+    COMPANY_DOMAIN {
+        string company_id PK
+        string company_name
+        string company_type "Client, Supplier, Carrier"
+        string tax_id
+        string phone_number
+        string email_address
+        boolean is_active
     }
 
-    Inventory {
-        String inventoryId PK
-        String itemName
-        String sku
-        int quantityAvailable
-        double unitWeight
-        String companyId FK
+    INVENTORY {
+        string inventory_id PK
+        string company_id FK
+        string item_name
+        string sku
+        int quantity_available
+        double unit_weight
     }
 
-    ShippingContract {
-        String contractId PK
-        String contractNumber
-        double pricePerKg
-        LocalDate contractStartDate
-        LocalDate contractExpiryDate
-        String companyId FK
+    SHIPPING_CONTRACT {
+        string contract_id PK
+        string company_id FK
+        string contract_number
+        double price_per_kg
+        date contract_start_date
+        date contract_expiry_date
     }
 
-    Shipment {
-        String shipmentId PK
-        double weight
-        String origin
-        String destination
-        LocalDate dispatchDate
-        LocalDate estimatedDeliveryDate
-        String contractId FK
+    SHIPMENT {
+        string shipment_id PK
+        string company_id FK
+        string contract_id FK
+        bigint created_by_staff_id FK
+        double total_weight
+        string origin
+        string destination
+        date dispatch_date
+        date estimated_delivery_date
+        string cargo_type
     }
 
-    ShipmentItem {
-        String shipmentId FK
-        String inventoryId FK
-        String sku
-        int quantity
+    SHIPMENT_ITEM {
+        string shipment_item_id PK
+        string shipment_id FK
+        string inventory_id FK
+        int quantity_shipped
     }
 
-    ShipmentTracking {
-        String trackingId PK
-        String trackingNumber
-        String currentLocation
-        String shipmentStatus
-        LocalDate dateCreated
-        String shipmentId FK
+    SHIPMENT_TRACKING {
+        string tracking_id PK
+        string shipment_id FK
+        string tracking_number
+        string current_location
+        string shipment_status
+        datetime date_created
     }
 
-    Invoice {
-        String invoiceId PK
-        double total
-        String paymentStatus
-        LocalDate dateIssued
-        String shipmentId FK
+    INVOICE {
+        string invoice_id PK
+        string shipment_id FK
+        string company_id FK
+        string description
+        double total_amount
+        string payment_status
+        datetime date_issued
+        datetime due_date
     }
+
+    STAFF_PROFILES {
+        bigint id PK
+        string username UK
+        string email UK
+        string name
+        string password_hash
+        string role
+        boolean active
+    }
+
+    PASSWORD_RESET_REQUESTS {
+        bigint id PK
+        bigint staff_profile_id FK
+        uuid token UK
+        string status
+        datetime created_at
+        datetime expires_at
+        datetime reviewed_at
+        datetime completed_at
+    }
+```

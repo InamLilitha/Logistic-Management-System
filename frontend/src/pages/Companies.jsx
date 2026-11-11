@@ -1,4 +1,4 @@
-/* 24/08/2026
+/**last Time worked on Wednesday 11/11/2026 04:48
  *Companies.jsx
  *Companies in pages folder
  * Maghdie Petersen 230600204
@@ -8,7 +8,7 @@ import React, {useState, useEffect} from 'react';
 import {getAllCompanies, createCompany, updateCompany, deleteCompany, getCompanyById} from '../services/CompanyService.js';
 import {Building2, Plus, Trash2, Edit3, Eye, Search, Mail, Phone, Hash, X} from 'lucide-react';
 
-const Companies = () => {
+const Companies = ({ canEdit = true }) => {
   const [companies, setCompanies] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({companyName: '', taxId: '', phoneNumber: '', emailAddress: ''});
@@ -35,16 +35,16 @@ const Companies = () => {
    e.preventDefault();
    createCompany(formData).then(() => {
      loadCompanies();
-     setFormData({companyName: '', taxId: '', phoneNumber: '', emailAddress: ''})
+     setFormData({companyName: '', companyType: '', taxId: '', phoneNumber: '', emailAddress: ''})
    });
   };
 
   const handleUpdateSubmit = (e) => {
     e.preventDefault();
-    updateCompany(editingCompany).then(() => {
+    updateCompany(editingCompany.companyId, editingCompany).then(() => {
       loadCompanies();
       setEditingCompany(null);
-    });
+    }).catch(err => console.error("Update Error:", err));
   };
 
   const handleDelete = (id) => {
@@ -60,18 +60,23 @@ const Companies = () => {
     <div className="p-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form */}
-        <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm h-fit">
+        {canEdit && <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm h-fit">
           <h2 className="text-lg font-bold text-lms-textMain mb-4 flex items-center gap-2">
             <Plus className="w-5 h-5 text-lms-action" /> Add Company
           </h2>
           <form onSubmit={handleCreateSubmit} className="space-y-4">
             <input type="text" name="companyName" placeholder="Company Name" value={formData.companyName} onChange={handleInputChange} className="w-full p-2.5 border rounded text-sm" required/>
+            <select name="companyType" value={formData.companyType} onChange={handleInputChange} className="w-full p-2.5 border rounded text-sm bg-white" required={}>
+              <option value="Client">Client</option>
+              <option value="Supplier">Supplier</option>
+              <option value="Carrier">Carrier</option>
+            </select>
             <input type="text" name="taxId" placeholder="Tax ID" value={formData.taxId} onChange={handleInputChange} className="w-full p-2.5 border rounded text-sm" required/>
             <input type="text" name="phoneNumber" placeholder="Phone Number" value={formData.phoneNumber} onChange={handleInputChange} className="w-full p-2.5 border rounded text-sm" required/>
             <input type="email" name="emailAddress" placeholder="Email Address" value={formData.emailAddress} onChange={handleInputChange} className="w-full p-2.5 border rounded text-sm" required/>
             <button type="submit" className="w-full bg-lms-action text-white py-2.5 rounded text-sm font-medium">Save Company</button>
           </form>
-        </div>
+        </div>}
 
         {/* Table */}
         <div className="lg:col-span-2 bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
@@ -83,6 +88,7 @@ const Companies = () => {
             <thead>
             <tr className="border-b bg-slate-50 text-xs font-semibold text-lms-textMuted uppercase">
               <th className="p-3">Name</th>
+              <th className="p-3">Type</th>
               <th className="p-3">Tax ID</th>
               <th className="p-3">Contact</th>
               <th className="p-3 text-right">Actions</th>
@@ -92,12 +98,20 @@ const Companies = () => {
             {filteredCompanies.map((c) => (
                 <tr key={c.companyId} className="hover:bg-lms-ice/40">
                   <td className="p-3 font-semibold">{c.companyName}</td>
+                  <td className="p-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      c.companyType === 'Client' ? 'bg-blue-100 text-blue-700' :
+                          c.companyType === 'Supplier' ? 'bg-purple-100 text-purple-700' : 'bg-amber-100 text-amber-700'   
+                    }`}>
+                      {c.companyType || 'Client'}
+                    </span>
+                  </td>
                   <td className="p-3 text-lms-textMuted">{c.taxId}</td>
                   <td className="p-3 text-xs text-lms-textMuted">{c.emailAddress} | {c.phoneNumber}</td>
                   <td className="p-3 text-right space-x-1">
                     <button onClick={() => getCompanyById(c.companyId).then(res => setViewingCompany(res.data))} className="text-lms-action p-1.5"><Eye className="w-4 h-4" /> </button>
-                    <button onClick={() => setEditingCompany(c)} className="text-amber-600 p-1.5"><Edit3 className="w-4 h-4"/> </button>
-                    <button onClick={() => handleDelete(c.companyId)} className="text-lms-danger p-1.5"><Trash2 className="w-4 h-4"/> </button>
+                    {canEdit && <button onClick={() => setEditingCompany(c)} className="text-amber-600 p-1.5"><Edit3 className="w-4 h-4"/> </button>}
+                    {canEdit && <button onClick={() => handleDelete(c.companyId)} className="text-lms-danger p-1.5"><Trash2 className="w-4 h-4"/> </button>}
                   </td>
                 </tr>
             ))}
@@ -107,12 +121,17 @@ const Companies = () => {
       </div>
 
       {/* Edit Modal */}
-      {editingCompany &&(
+      {canEdit && editingCompany &&(
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg p-6 max-w-md w-full">
               <h3 className="text-lg font-bold mb-4">Edit Company</h3>
               <form onSubmit={handleUpdateSubmit} className="space-y-3">
                 <input type="text" name="companyName" value={editingCompany.companyName} onChange={handleInputChange} className="w-full p-2 border rounded text-sm" required/>
+                <select name="companyType" value={formData.companyType} onChange={handleInputChange} className="w-full p-2.5 border rounded text-sm bg-white" required={}>
+                  <option value="Client">Client</option>
+                  <option value="Supplier">Supplier</option>
+                  <option value="Carrier">Carrier</option>
+                </select>
                 <input type="text" name="taxId" value={editingCompany.taxId} onChange={handleInputChange} className="w-full p-2 border rounded text-sm" required/>
                 <input type="text" name="phoneNumber" value={editingCompany.phoneNumber} onChange={handleInputChange} className="w-full p-2 border rounded text-sm" required/>
                 <input type="email" name="emailAddress" value={editingCompany.emailAddress} onChange={handleInputChange} className="w-full p-2 border rounded text-sm" required/>
@@ -133,6 +152,7 @@ const Companies = () => {
               <div className="space-y-2 text-sm">
                 <p><strong>ID:</strong> {viewingCompany.companyId}</p>
                 <p><strong>Name:</strong> {viewingCompany.companyName}</p>
+                <p><strong>Type:</strong> {viewingCompany.companyType}</p>
                 <p><strong>Tax ID:</strong> {viewingCompany.taxId}</p>
                 <p><strong>Phone:</strong> {viewingCompany.phoneNumber}</p>
                 <p><strong>Email:</strong> {viewingCompany.emailAddress}</p>

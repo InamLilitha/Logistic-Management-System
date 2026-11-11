@@ -3,8 +3,13 @@ package za.ac.cput.logisticmanagementsystem.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import za.ac.cput.logisticmanagementsystem.domain.Invoice;
+import za.ac.cput.logisticmanagementsystem.domain.Shipment;
+import za.ac.cput.logisticmanagementsystem.domain.ShippingContract;
 import za.ac.cput.logisticmanagementsystem.repository.IInvoiceRepository;
+import za.ac.cput.logisticmanagementsystem.repository.IShipmentRepository;
+import za.ac.cput.logisticmanagementsystem.repository.ShippingContractRepository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,45 +17,47 @@ import java.util.UUID;
  * InvoiceService.java
  * Service implementation for Invoice business logic
  * Author: Tebogo Pii 230226442
- * Date: 27 July 2026
+ * Date: 27 July 2026 / Updated: November 2026
  */
 
 @Service
 public class InvoiceService implements IInvoiceService {
 
-    private final IInvoiceRepository repository;
+    private final IInvoiceRepository invoiceRepository;
+    private final IShipmentRepository shipmentRepository;
+    private final ShippingContractRepository contractRepository;
 
     @Autowired
-    public InvoiceService(IInvoiceRepository repository) {
-        this.repository = repository;
+    public InvoiceService(IInvoiceRepository invoiceRepository,
+                          IShipmentRepository shipmentRepository,
+                          ShippingContractRepository contractRepository) {
+        this.invoiceRepository  = invoiceRepository;
+        this.shipmentRepository = shipmentRepository;
+        this.contractRepository = contractRepository;
     }
 
     @Override
     public Invoice create(Invoice invoice) {
-        if (invoice == null) {
-            return null;
-        }
+        if (invoice == null) return null;
         invoice.invoiceId = UUID.randomUUID().toString();
-        return repository.save(invoice);
+        return invoiceRepository.save(invoice);
     }
 
     @Override
     public Invoice read(String invoiceId) {
-        return repository.findById(invoiceId).orElse(null);
+        return invoiceRepository.findById(invoiceId).orElse(null);
     }
 
     @Override
     public Invoice update(Invoice invoice) {
-        if (invoice == null) {
-            return null;
-        }
-        return repository.save(invoice);
+        if (invoice == null) return null;
+        return invoiceRepository.save(invoice);
     }
 
     @Override
     public boolean delete(String invoiceId) {
-        if (repository.existsById(invoiceId)) {
-            repository.deleteById(invoiceId);
+        if (invoiceRepository.existsById(invoiceId)) {
+            invoiceRepository.deleteById(invoiceId);
             return true;
         }
         return false;
@@ -58,24 +65,86 @@ public class InvoiceService implements IInvoiceService {
 
     @Override
     public List<Invoice> getAll() {
-        return repository.findAll();
+        return invoiceRepository.findAll();
+    }
+
+    @Override
+    public List<Invoice> getByShipmentId(String shipmentId) {
+        return invoiceRepository.findByShipmentId(shipmentId);
+    }
+
+    @Override
+    public List<Invoice> getByCompanyId(String companyId) {
+        return invoiceRepository.findByCompanyId(companyId);
+    }
+
+    @Override
+    public List<Invoice> getByPaymentStatus(String paymentStatus) {
+        return invoiceRepository.findByPaymentStatus(paymentStatus);
+    }
+
+    @Override
+    public List<Invoice> getByDateRange(Date from, Date to) {
+        return invoiceRepository.findByDateIssuedBetween(from, to);
     }
 
     @Override
     public Invoice updatePaymentStatus(String invoiceId, String paymentStatus) {
+        if (paymentStatus == null || paymentStatus.isBlank()) return null;
         Invoice invoice = read(invoiceId);
-        if (invoice != null && paymentStatus != null && !paymentStatus.isEmpty()) {
+        if (invoice == null) return null;
+        Invoice updated = new Invoice.Builder()
+                .copy(invoice)
+                .paymentStatus(paymentStatus)
+                .build();
+        return invoiceRepository.save(updated);
+    }
+
+    @Override
+    public int markOverdueInvoices() {
+        List<Invoice> overdue = invoiceRepository.findOverdueInvoices(new Date());
+        int count = 0;
+        for (Invoice inv : overdue) {
             Invoice updated = new Invoice.Builder()
-                    .invoiceId(invoice.getInvoiceId())
-                    .customerName(invoice.getCustomerName())
-                    .description(invoice.getDescription())
-                    .total(invoice.getTotal())
-                    .paymentStatus(paymentStatus)
-                    .dateIssued(invoice.getDateIssued())
-                    .dueDate(invoice.getDueDate())
+                    .copy(inv)
+                    .paymentStatus("Overdue")
                     .build();
-            return repository.save(updated);
+            invoiceRepository.save(updated);
+            count++;
         }
-        return null;
+        return count;
+    }
+
+    @Override
+    public Invoice generateFromShipment(String shipmentId, String companyId,
+                                        String description, int paymentTermDays) {
+        Shipment shipment = shipmentRepository.findById(shipmentId).orElse(null);
+        if (shipment == null) return null;
+
+        String contractId = shipment.getContractId();
+        if (contractId == null || contractId.isBlank()) return null;
+
+        ShippingContract contract = contractRepository.findById(contractId).orElse(null);
+        if (contract == null) return null;
+
+        if (invoiceRepository.existsByShipmentId(shipmentId)) return null;
+
+        double totalAmount = shipment.getWeight() * contract.getPricePerKg();
+        Date now     = new Date();
+        Date dueDate = new Date(now.getTime() + ((long) paymentTermDays * 24 * 60 * 60 * 1000));
+
+        Invoice invoice = new Invoice.Builder()
+                .invoiceId(UUID.randomUUID().toString())
+                .shipmentId(shipmentId)
+                .companyId(companyId)
+                .description(description != null ? description
+                        : "Freight charges — shipment " + shipmentId)
+                .total(totalAmount)
+                .paymentStatus("Unpaid")
+                .dateIssued(now)
+                .dueDate(dueDate)
+                .build();
+
+        return invoiceRepository.save(invoice);
     }
 }

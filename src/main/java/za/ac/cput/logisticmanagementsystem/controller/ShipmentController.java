@@ -2,7 +2,7 @@ package za.ac.cput.logisticmanagementsystem.controller;
 
 import org.springframework.web.bind.annotation.*;
 import za.ac.cput.logisticmanagementsystem.domain.Shipment;
-import za.ac.cput.logisticmanagementsystem.service.impl.ShipmentService;
+import za.ac.cput.logisticmanagementsystem.service.IShipmentService;
 
 import java.util.List;
 
@@ -11,10 +11,9 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000")
 public class ShipmentController {
 
+    private final IShipmentService service;
 
-    private ShipmentService service;
-
-    public ShipmentController(ShipmentService service) {
+    public ShipmentController(IShipmentService service) {
         this.service = service;
     }
 
@@ -24,7 +23,7 @@ public class ShipmentController {
     }
 
     @GetMapping("/{id}")
-    public Shipment read(@PathVariable String id){
+    public Shipment read(@PathVariable String id) {
         return service.read(id);
     }
 

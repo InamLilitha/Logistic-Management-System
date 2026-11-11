@@ -1,5 +1,4 @@
-/* 27/07/2026
- * 28/07/2026
+/*last Time worked on Wednesday 11/11/2026 04:10
  *CompanyFactory.java
  *CompanyFactory model class in factory folder
  *Maghdie Petersen 230600204
@@ -11,8 +10,8 @@ import za.ac.cput.logisticmanagementsystem.util.Helper;
 
 public class CompanyFactory {
 
-    public static CompanyDomain createCompanyDomain(String companyName, String taxId,String phoneNumber, String emailAddress){
-        if (Helper.isNullOrEmpty(companyName) || Helper.isNullOrEmpty(taxId)){
+    public static CompanyDomain createCompanyDomain(String companyName, String companyType, String taxId, String phoneNumber, String emailAddress){
+        if (Helper.isNullOrEmpty(companyName) || Helper.isNullOrEmpty(taxId) || Helper.isNullOrEmpty(companyType)){
             return null;
         }
 
@@ -25,6 +24,7 @@ public class CompanyFactory {
         return new CompanyDomain.Builder()
                 .setCompanyId(companyId)
                 .setCompanyName(companyName)
+                .setCompanyType(companyType)
                 .setTaxId(taxId)
                 .setPhoneNumber(phoneNumber)
                 .setEmailAddress(emailAddress)

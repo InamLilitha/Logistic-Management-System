@@ -7,9 +7,8 @@
 
 package za.ac.cput.logisticmanagementsystem.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import za.ac.cput.logisticmanagementsystem.domain.CompanyDomain;
-import java.util.Set;
 
-public interface ICompanyRepository extends IRepository<CompanyDomain, String>{
-    Set<CompanyDomain> getAll();
+public interface ICompanyRepository extends JpaRepository<CompanyDomain, String> {
 }

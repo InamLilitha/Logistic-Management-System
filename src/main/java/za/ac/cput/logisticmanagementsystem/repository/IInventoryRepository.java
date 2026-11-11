@@ -1,24 +1,18 @@
-/*
- * 28/07/2026
- * IInventoryRepository.java
- * Repository interface for Inventory CRUD operations
- */
-
 package za.ac.cput.logisticmanagementsystem.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import jakarta.persistence.LockModeType;
 import za.ac.cput.logisticmanagementsystem.domain.Inventory;
 
-import java.util.List;
+import java.util.Optional;
 
-public interface IInventoryRepository {
+public interface IInventoryRepository extends JpaRepository<Inventory, String> {
+    boolean existsByCompanyId(String companyId);
 
-    Inventory create(Inventory inventory);
-
-    Inventory read(String inventoryId);
-
-    Inventory update(Inventory inventory);
-
-    boolean delete(String inventoryId);
-
-    List<Inventory> getAll();
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select inventory from Inventory inventory where inventory.inventoryId = :inventoryId")
+    Optional<Inventory> findByIdForUpdate(@Param("inventoryId") String inventoryId);
 }

@@ -7,88 +7,145 @@
 package za.ac.cput.logisticmanagementsystem.service;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import za.ac.cput.logisticmanagementsystem.repository.ICompanyRepository;
+import za.ac.cput.logisticmanagementsystem.repository.IInventoryRepository;
+
+import java.util.List;
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import za.ac.cput.logisticmanagementsystem.domain.Inventory;
 import za.ac.cput.logisticmanagementsystem.factory.InventoryFactory;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@ExtendWith(MockitoExtension.class)
 public class InventoryServiceTest {
 
-    private static final IInventoryService service = new InventoryService();
-    private static final Inventory inventory = InventoryFactory.createInventory("Keyboard",
-            "SKU-98765", 50, 0.5, "company-003");
+    @Mock
+    private IInventoryRepository repository;
+
+    @Mock
+    private ICompanyRepository companyRepository;
+
+    @InjectMocks
+    private InventoryService service;
+
+    private Inventory inventory() {
+        return InventoryFactory.createInventory("Keyboard", "SKU-98765", 50, 0.5, "company-003");
+    }
 
     @Test
-    @Order(1)
-    void a_create() {
+    void createPersistsInventory() {
+        Inventory inventory = inventory();
+        when(companyRepository.existsById(inventory.getCompanyId())).thenReturn(true);
+        when(repository.save(inventory)).thenReturn(inventory);
+
         Inventory created = service.create(inventory);
+
         assertNotNull(created);
         assertEquals(inventory.getInventoryId(), created.getInventoryId());
-        System.out.println("Created " + created);
+        verify(repository).save(inventory);
     }
 
     @Test
-    @Order(2)
-    void b_read() {
+    void readFindsInventoryById() {
+        Inventory inventory = inventory();
+        when(repository.findById(inventory.getInventoryId())).thenReturn(Optional.of(inventory));
+
         Inventory read = service.read(inventory.getInventoryId());
+
         assertNotNull(read);
         assertEquals("Keyboard", read.getItemName());
-        System.out.println("Read " + read);
     }
 
     @Test
-    @Order(3)
-    void c_update() {
+    void updatePersistsInventory() {
+        Inventory inventory = inventory();
         Inventory updatedInventory = new Inventory.Builder()
                 .copy(inventory).setQuantityAvailable(60).build();
+        when(repository.existsById(inventory.getInventoryId())).thenReturn(true);
+        when(companyRepository.existsById(inventory.getCompanyId())).thenReturn(true);
+        when(repository.save(updatedInventory)).thenReturn(updatedInventory);
 
         Inventory updated = service.update(updatedInventory);
+
         assertNotNull(updated);
         assertEquals(60, updated.getQuantityAvailable());
-        System.out.println("Updated " + updated);
+        verify(repository).save(updatedInventory);
     }
 
     @Test
-    @Order(4)
-    void d_updateQuantity() {
+    void updateQuantityPersistsUpdatedInventory() {
+        Inventory inventory = inventory();
+        when(repository.findById(inventory.getInventoryId())).thenReturn(Optional.of(inventory));
+        when(repository.save(any(Inventory.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
         Inventory updated = service.updateQuantity(inventory.getInventoryId(), 75);
+
         assertNotNull(updated);
         assertEquals(75, updated.getQuantityAvailable());
-        System.out.println("Updated Quantity " + updated);
+        verify(repository).save(updated);
     }
 
     @Test
-    @Order(5)
-    void e_getAll() {
-        assertTrue(service.getAll().size() > 0);
-        System.out.println("All inventories: " + service.getAll());
+    void getAllReturnsPersistedInventory() {
+        Inventory inventory = inventory();
+        when(repository.findAll()).thenReturn(List.of(inventory));
+
+        assertEquals(List.of(inventory), service.getAll());
     }
 
     @Test
-    @Order(6)
-    void f_delete() {
+    void deleteRemovesExistingInventory() {
+        Inventory inventory = inventory();
+        when(repository.existsById(inventory.getInventoryId())).thenReturn(true);
+
         boolean deleted = service.delete(inventory.getInventoryId());
+
         assertTrue(deleted);
-        assertNull(service.read(inventory.getInventoryId()));
-        System.out.println("Deleted Successfully: " + inventory.getInventoryId());
+        verify(repository).deleteById(inventory.getInventoryId());
     }
 
     @Test
     void testCreateWithNullInventory() {
         Inventory created = service.create(null);
+
         assertNull(created);
+        verifyNoInteractions(repository);
+        verifyNoInteractions(companyRepository);
     }
 
     @Test
     void testUpdateQuantityWithNegative() {
-        Inventory inventory = InventoryFactory.createInventory("Mouse",
-                "SKU-11111", 20, 0.2, "company-004");
-        service.create(inventory);
+        Inventory inventory = inventory();
+        when(repository.findById(inventory.getInventoryId())).thenReturn(Optional.of(inventory));
+
         Inventory updated = service.updateQuantity(inventory.getInventoryId(), -5);
+
         assertNull(updated);
+        verify(repository, never()).save(any(Inventory.class));
+    }
+
+    @Test
+    void createRejectsInventoryWithUnknownCompany() {
+        Inventory inventory = inventory();
+        when(companyRepository.existsById(inventory.getCompanyId())).thenReturn(false);
+
+        assertNull(service.create(inventory));
+        verify(repository, never()).save(any(Inventory.class));
+    }
+
+    @Test
+    void updateRejectsInventoryThatDoesNotExist() {
+        Inventory inventory = inventory();
+        when(repository.existsById(inventory.getInventoryId())).thenReturn(false);
+
+        assertNull(service.update(inventory));
+        verifyNoInteractions(companyRepository);
     }
 }

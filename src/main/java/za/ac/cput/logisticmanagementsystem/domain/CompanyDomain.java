@@ -23,7 +23,7 @@ public class CompanyDomain implements Serializable{
     private String emailAddress;
     private boolean isActive;
 
-    private CompanyDomain() {}
+    protected CompanyDomain() {}
 
     private CompanyDomain(Builder builder) {
         this.companyId=builder.companyId;

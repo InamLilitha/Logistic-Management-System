@@ -6,21 +6,44 @@
 
 package za.ac.cput.logisticmanagementsystem.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "inventory")
 public class Inventory {
 
     @Id
+    @Column(nullable = false, updatable = false)
     private String inventoryId;
+
+    @Column(nullable = false)
     private String itemName;
+
+    @Column(nullable = false)
     private String sku;
+
+    @Column(nullable = false)
     private int quantityAvailable;
+
+    @Column(nullable = false)
     private double unitWeight;
+
+    @Column(name = "company_id", nullable = false)
     private String companyId;
 
-    private Inventory(){}
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", referencedColumnName = "company_id", insertable = false, updatable = false)
+    private CompanyDomain company;
+
+    protected Inventory(){}
 
     public Inventory(Builder builder){
         this.inventoryId = builder.inventoryId;

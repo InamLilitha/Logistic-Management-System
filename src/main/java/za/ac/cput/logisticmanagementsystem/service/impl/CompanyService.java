@@ -8,64 +8,106 @@
 package za.ac.cput.logisticmanagementsystem.service.impl;
 
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import za.ac.cput.logisticmanagementsystem.domain.CompanyDomain;
-import za.ac.cput.logisticmanagementsystem.repository.CompanyRepository;
+import za.ac.cput.logisticmanagementsystem.factory.CompanyFactory;
+import za.ac.cput.logisticmanagementsystem.repository.ICompanyRepository;
+import za.ac.cput.logisticmanagementsystem.repository.IInventoryRepository;
 import za.ac.cput.logisticmanagementsystem.service.ICompanyService;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Service
-public class CompanyService implements ICompanyService{
+@Transactional
+public class CompanyService implements ICompanyService {
+    private final ICompanyRepository repository;
+    private final IInventoryRepository inventoryRepository;
 
-private final CompanyRepository repository;
-
-public CompanyService(){
-    this.repository = CompanyRepository.getRepository();
-}
+    public CompanyService(ICompanyRepository repository, IInventoryRepository inventoryRepository) {
+        this.repository = repository;
+        this.inventoryRepository = inventoryRepository;
+    }
 
     @Override
     public CompanyDomain create(CompanyDomain companyDomain) {
-        return repository.create(companyDomain);
+        if (companyDomain == null) {
+            return null;
+        }
+        CompanyDomain validCompany = CompanyFactory.createCompanyDomain(
+                companyDomain.getCompanyName(),
+                companyDomain.getTaxId(),
+                companyDomain.getPhoneNumber(),
+                companyDomain.getEmailAddress()
+        );
+        return validCompany == null ? null : repository.save(validCompany);
     }
 
     @Override
     public CompanyDomain read(String companyId) {
-        return repository.read(companyId);
+        if (companyId == null) {
+            return null;
+        }
+        return repository.findById(companyId).orElse(null);
     }
 
     @Override
     public CompanyDomain update(CompanyDomain companyDomain) {
-        return repository.update(companyDomain);
+        if (companyDomain == null || companyDomain.getCompanyId() == null
+                || !repository.existsById(companyDomain.getCompanyId())) {
+            return null;
+        }
+        CompanyDomain validCompany = CompanyFactory.createCompanyDomain(
+                companyDomain.getCompanyName(),
+                companyDomain.getTaxId(),
+                companyDomain.getPhoneNumber(),
+                companyDomain.getEmailAddress()
+        );
+        if (validCompany == null) {
+            return null;
+        }
+        CompanyDomain updatedCompany = new CompanyDomain.Builder()
+                .copy(validCompany)
+                .setCompanyId(companyDomain.getCompanyId())
+                .setIsActive(companyDomain.isActive())
+                .build();
+        return repository.save(updatedCompany);
     }
 
     @Override
     public boolean delete(String companyId) {
-        return repository.delete(companyId);
+        if (companyId == null || !repository.existsById(companyId)
+                || inventoryRepository.existsByCompanyId(companyId)) {
+            return false;
+        }
+        repository.deleteById(companyId);
+        return true;
     }
 
     @Override
     public Set<CompanyDomain> getAll() {
-        return repository.getAll();
+        return new HashSet<>(repository.findAll());
     }
 
     @Override
     public CompanyDomain activateCompanyDomain(String companyId) {
-        CompanyDomain companyDomain = repository.read(companyId);
-        if (companyDomain != null ){
-            CompanyDomain updated = new CompanyDomain.Builder().copy(companyDomain).setIsActive(true).build();
-        return repository.update(updated);
-        }
-        return null;
+        return setActive(companyId, true);
     }
 
     @Override
     public CompanyDomain deactivateCompanyDomain(String companyId) {
-        CompanyDomain companyDomain = repository.read(companyId);
-        if (companyDomain != null ){
-            CompanyDomain updated = new CompanyDomain.Builder().copy(companyDomain).setIsActive(false).build();
-            return repository.update(updated);
+        return setActive(companyId, false);
+    }
+
+    private CompanyDomain setActive(String companyId, boolean active) {
+        CompanyDomain company = read(companyId);
+        if (company == null) {
+            return null;
         }
-        return null;
+        CompanyDomain updated = new CompanyDomain.Builder()
+                .copy(company)
+                .setIsActive(active)
+                .build();
+        return repository.save(updated);
     }
 }

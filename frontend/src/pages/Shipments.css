@@ -152,6 +152,74 @@
     gap: 22px;
 }
 
+.shipment-items-section {
+    margin-top: 24px;
+    padding: 18px;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    background: #F8FAFC;
+}
+
+.shipment-items-heading,
+.shipment-item-row {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.shipment-items-heading {
+    margin-bottom: 16px;
+}
+
+.shipment-items-heading h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.shipment-items-heading p,
+.shipment-item-hint {
+    margin: 0;
+    color: #64748B;
+    font-size: 13px;
+}
+
+.shipment-item-row {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(120px, 1fr) auto;
+    margin-top: 12px;
+}
+
+.shipment-item-row label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #0F172A;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.shipment-item-row input,
+.shipment-item-row select {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 10px;
+    border: 1px solid #CBD5E1;
+    border-radius: 7px;
+    background: #FFFFFF;
+    color: #0F172A;
+    font: inherit;
+}
+
+.shipment-item-remove {
+    min-height: 42px;
+}
+
+.shipment-item-hint {
+    margin-top: 12px;
+}
+
 .form-group {
     display: flex;
     flex-direction: column;

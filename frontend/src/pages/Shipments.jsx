@@ -184,6 +184,29 @@ function Shipments({ canEdit = true }) {
   // FORM HANDLING
   // --------------------------------------------------
 
+  const loadInventory = async () => {
+    try {
+      const response = await getAllInventory();
+      setInventory(Array.isArray(response.data) ? response.data : []);
+    } catch (loadError) {
+      setError("Inventory items could not be loaded. Shipment stock deductions are unavailable until the server connection is restored.");
+    }
+  };
+
+  const addShipmentItem = () => {
+    setShipmentItems(current => [...current, { inventoryId: "", quantity: "1" }]);
+  };
+
+  const updateShipmentItem = (index, field, value) => {
+    setShipmentItems(current => current.map((item, itemIndex) =>
+      itemIndex === index ? { ...item, [field]: value } : item
+    ));
+  };
+
+  const removeShipmentItem = (index) => {
+    setShipmentItems(current => current.filter((_, itemIndex) => itemIndex !== index));
+  };
+
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -449,6 +472,7 @@ function Shipments({ canEdit = true }) {
             }
           ]
     });
+    setShipmentItems([]);
 
     setError("");
     setSuccess("");

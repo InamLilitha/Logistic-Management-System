@@ -1,4 +1,4 @@
-/* 11/11/2026
+/**last Time worked on Wednesday 11/11/2026 04:48
  *Companies.jsx
  *Companies in pages folder
  * Maghdie Petersen 230600204
@@ -35,7 +35,7 @@ const Companies = ({ canEdit = true }) => {
    e.preventDefault();
    createCompany(formData).then(() => {
      loadCompanies();
-     setFormData({companyName: '', taxId: '', phoneNumber: '', emailAddress: ''})
+     setFormData({companyName: '', companyType: '', taxId: '', phoneNumber: '', emailAddress: ''})
    });
   };
 
@@ -66,6 +66,11 @@ const Companies = ({ canEdit = true }) => {
           </h2>
           <form onSubmit={handleCreateSubmit} className="space-y-4">
             <input type="text" name="companyName" placeholder="Company Name" value={formData.companyName} onChange={handleInputChange} className="w-full p-2.5 border rounded text-sm" required/>
+            <select name="companyType" value={formData.companyType} onChange={handleInputChange} className="w-full p-2.5 border rounded text-sm bg-white" required={}>
+              <option value="Client">Client</option>
+              <option value="Supplier">Supplier</option>
+              <option value="Carrier">Carrier</option>
+            </select>
             <input type="text" name="taxId" placeholder="Tax ID" value={formData.taxId} onChange={handleInputChange} className="w-full p-2.5 border rounded text-sm" required/>
             <input type="text" name="phoneNumber" placeholder="Phone Number" value={formData.phoneNumber} onChange={handleInputChange} className="w-full p-2.5 border rounded text-sm" required/>
             <input type="email" name="emailAddress" placeholder="Email Address" value={formData.emailAddress} onChange={handleInputChange} className="w-full p-2.5 border rounded text-sm" required/>
@@ -83,6 +88,7 @@ const Companies = ({ canEdit = true }) => {
             <thead>
             <tr className="border-b bg-slate-50 text-xs font-semibold text-lms-textMuted uppercase">
               <th className="p-3">Name</th>
+              <th className="p-3">Type</th>
               <th className="p-3">Tax ID</th>
               <th className="p-3">Contact</th>
               <th className="p-3 text-right">Actions</th>
@@ -92,6 +98,14 @@ const Companies = ({ canEdit = true }) => {
             {filteredCompanies.map((c) => (
                 <tr key={c.companyId} className="hover:bg-lms-ice/40">
                   <td className="p-3 font-semibold">{c.companyName}</td>
+                  <td className="p-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      c.companyType === 'Client' ? 'bg-blue-100 text-blue-700' :
+                          c.companyType === 'Supplier' ? 'bg-purple-100 text-purple-700' : 'bg-amber-100 text-amber-700'   
+                    }`}>
+                      {c.companyType || 'Client'}
+                    </span>
+                  </td>
                   <td className="p-3 text-lms-textMuted">{c.taxId}</td>
                   <td className="p-3 text-xs text-lms-textMuted">{c.emailAddress} | {c.phoneNumber}</td>
                   <td className="p-3 text-right space-x-1">
@@ -113,6 +127,11 @@ const Companies = ({ canEdit = true }) => {
               <h3 className="text-lg font-bold mb-4">Edit Company</h3>
               <form onSubmit={handleUpdateSubmit} className="space-y-3">
                 <input type="text" name="companyName" value={editingCompany.companyName} onChange={handleInputChange} className="w-full p-2 border rounded text-sm" required/>
+                <select name="companyType" value={formData.companyType} onChange={handleInputChange} className="w-full p-2.5 border rounded text-sm bg-white" required={}>
+                  <option value="Client">Client</option>
+                  <option value="Supplier">Supplier</option>
+                  <option value="Carrier">Carrier</option>
+                </select>
                 <input type="text" name="taxId" value={editingCompany.taxId} onChange={handleInputChange} className="w-full p-2 border rounded text-sm" required/>
                 <input type="text" name="phoneNumber" value={editingCompany.phoneNumber} onChange={handleInputChange} className="w-full p-2 border rounded text-sm" required/>
                 <input type="email" name="emailAddress" value={editingCompany.emailAddress} onChange={handleInputChange} className="w-full p-2 border rounded text-sm" required/>
@@ -133,6 +152,7 @@ const Companies = ({ canEdit = true }) => {
               <div className="space-y-2 text-sm">
                 <p><strong>ID:</strong> {viewingCompany.companyId}</p>
                 <p><strong>Name:</strong> {viewingCompany.companyName}</p>
+                <p><strong>Type:</strong> {viewingCompany.companyType}</p>
                 <p><strong>Tax ID:</strong> {viewingCompany.taxId}</p>
                 <p><strong>Phone:</strong> {viewingCompany.phoneNumber}</p>
                 <p><strong>Email:</strong> {viewingCompany.emailAddress}</p>

@@ -1,5 +1,4 @@
-/*
- * 28/07/2026
+/*last Time worked on Wednesday 11/11/2026 04:22
  *CompanyController.java
  *CompanyController model class in controller folder
  *Maghdie Petersen 230600204
@@ -13,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import za.ac.cput.logisticmanagementsystem.domain.CompanyDomain;
+import za.ac.cput.logisticmanagementsystem.factory.CompanyFactory;
 import za.ac.cput.logisticmanagementsystem.service.impl.CompanyService;
 
 import java.util.Set;
@@ -21,7 +21,7 @@ import java.util.Set;
 
 @RequestMapping("/api/companies")
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 
 public class CompanyController {
 
@@ -30,10 +30,19 @@ public class CompanyController {
 
     @PostMapping("/create")
     public ResponseEntity<CompanyDomain> create(@RequestBody CompanyDomain companyDomain) {
-        CompanyDomain created = companyService.create(companyDomain);
-        if (created == null){
+        CompanyDomain newCompany = CompanyFactory.createCompanyDomain(
+                companyDomain.getCompanyName(),
+                companyDomain.getCompanyType(),
+                companyDomain.getTaxId(),
+                companyDomain.getPhoneNumber(),
+                companyDomain.getEmailAddress()
+        );
+
+
+        if (newCompany == null){
             return ResponseEntity.badRequest().build();
         }
+        CompanyDomain created = companyService.create(newCompany);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 

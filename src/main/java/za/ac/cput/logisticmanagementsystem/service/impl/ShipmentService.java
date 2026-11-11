@@ -20,7 +20,7 @@ import za.ac.cput.logisticmanagementsystem.factory.ShipmentFactory;
 
 import za.ac.cput.logisticmanagementsystem.repository.ICompanyRepository;
 import za.ac.cput.logisticmanagementsystem.repository.IShipmentRepository;
-import za.ac.cput.logisticmanagementsystem.repository.InventoryRepository;
+import za.ac.cput.logisticmanagementsystem.repository.IInventoryRepository;
 import za.ac.cput.logisticmanagementsystem.repository.ShippingContractRepository;
 import za.ac.cput.logisticmanagementsystem.repository.StaffProfileRepository;
 
@@ -41,14 +41,14 @@ public class ShipmentService implements IShipmentService {
     private final ICompanyRepository companyRepository;
     private final ShippingContractRepository contractRepository;
     private final StaffProfileRepository staffRepository;
-    private final InventoryRepository inventoryRepository;
+    private final IInventoryRepository inventoryRepository;
 
     public ShipmentService(
             IShipmentRepository repository,
             ICompanyRepository companyRepository,
             ShippingContractRepository contractRepository,
             StaffProfileRepository staffRepository,
-            InventoryRepository inventoryRepository) {
+            IInventoryRepository inventoryRepository) {
 
         this.repository = repository;
         this.companyRepository = companyRepository;
@@ -57,7 +57,7 @@ public class ShipmentService implements IShipmentService {
         this.inventoryRepository = inventoryRepository;
     }
 
-    // CREATE SHIPMENT
+
 
     @Override
     public Shipment create(Shipment request) {
@@ -99,7 +99,6 @@ public class ShipmentService implements IShipmentService {
                 staff
         );
 
-        // Create shipment inventory allocations.
 
         List<ShipmentItem> shipmentItems =
                 buildShipmentItems(
@@ -108,7 +107,7 @@ public class ShipmentService implements IShipmentService {
                         company
                 );
 
-        // Deduct allocated quantities from inventory.
+
 
         applyInventoryChanges(
                 new ArrayList<>(),
@@ -120,7 +119,6 @@ public class ShipmentService implements IShipmentService {
         return repository.save(shipment);
     }
 
-    // READ SHIPMENT
 
     @Override
     public Shipment read(String id) {
@@ -134,7 +132,6 @@ public class ShipmentService implements IShipmentService {
         return repository.findById(id).orElse(null);
     }
 
-    // READ ALL SHIPMENTS
 
     @Override
     public List<Shipment> readAll() {
@@ -142,7 +139,7 @@ public class ShipmentService implements IShipmentService {
         return repository.findAll();
     }
 
-    // UPDATE SHIPMENT
+
 
     @Override
     public Shipment update(Shipment shipment) {
@@ -171,11 +168,8 @@ public class ShipmentService implements IShipmentService {
 
         validateContract(contract, shipment.getDispatchDate());
 
-        // Preserve the original creator.
-
         StaffProfile staff = existingShipment.getCreatedByStaff();
 
-        // Keep the existing persistent collection.
 
         List<ShipmentItem> existingItems =
                 existingShipment.getShipmentItems();
@@ -199,8 +193,6 @@ public class ShipmentService implements IShipmentService {
                 .shipmentItems(existingItems)
                 .build();
 
-        // Build the replacement inventory allocations.
-
         List<ShipmentItem> newItems =
                 buildShipmentItems(
                         shipment.getShipmentItems(),
@@ -208,19 +200,12 @@ public class ShipmentService implements IShipmentService {
                         company
                 );
 
-        // Restore old quantities and deduct new quantities.
-
         applyInventoryChanges(oldItems, newItems);
-
-        // Replace the existing shipment item collection.
-
         existingItems.clear();
         existingItems.addAll(newItems);
 
         return repository.save(updatedShipment);
     }
-
-    // DELETE SHIPMENT
 
     @Override
     public void delete(String id) {
@@ -236,8 +221,6 @@ public class ShipmentService implements IShipmentService {
                         "Shipment not found: " + id
                 ));
 
-        // Return allocated quantities to inventory.
-
         applyInventoryChanges(
                 new ArrayList<>(shipment.getShipmentItems()),
                 new ArrayList<>()
@@ -246,7 +229,6 @@ public class ShipmentService implements IShipmentService {
         repository.delete(shipment);
     }
 
-    // RESOLVE COMPANY
 
     private CompanyDomain resolveCompany(CompanyDomain requestedCompany) {
 
@@ -267,7 +249,6 @@ public class ShipmentService implements IShipmentService {
                 ));
     }
 
-    // RESOLVE CONTRACT
 
     private ShippingContract resolveContract(
             ShippingContract requestedContract) {
@@ -290,7 +271,6 @@ public class ShipmentService implements IShipmentService {
                 ));
     }
 
-    // CREATE SHIPMENT ITEMS
 
     private List<ShipmentItem> buildShipmentItems(
             List<ShipmentItem> requestedItems,
@@ -333,7 +313,6 @@ public class ShipmentService implements IShipmentService {
                             "Inventory not found: " + inventoryId
                     ));
 
-            // Ensure inventory belongs to the selected company.
 
             if (!company.getCompanyId().equals(inventory.getCompanyId())) {
 
@@ -356,7 +335,6 @@ public class ShipmentService implements IShipmentService {
         return shipmentItems;
     }
 
-    // UPDATE INVENTORY QUANTITIES
 
     private void applyInventoryChanges(
             List<ShipmentItem> oldItems,
@@ -364,7 +342,6 @@ public class ShipmentService implements IShipmentService {
 
         Map<String, Integer> quantityChanges = new HashMap<>();
 
-        // Existing allocations are returned.
 
         for (ShipmentItem item : oldItems) {
 
@@ -377,8 +354,6 @@ public class ShipmentService implements IShipmentService {
                     Integer::sum
             );
         }
-
-        // New allocations are deducted.
 
         for (ShipmentItem item : newItems) {
 
@@ -428,7 +403,6 @@ public class ShipmentService implements IShipmentService {
         }
     }
 
-    // VALIDATE CONTRACT
 
     private void validateContract(
             ShippingContract contract,

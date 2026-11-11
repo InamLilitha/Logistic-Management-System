@@ -1,4 +1,4 @@
-/* 24/08/2026
+/* 11/11/2026
  *Companies.jsx
  *Companies in pages folder
  * Maghdie Petersen 230600204
@@ -41,10 +41,10 @@ const Companies = ({ canEdit = true }) => {
 
   const handleUpdateSubmit = (e) => {
     e.preventDefault();
-    updateCompany(editingCompany).then(() => {
+    updateCompany(editingCompany.companyId, editingCompany).then(() => {
       loadCompanies();
       setEditingCompany(null);
-    });
+    }).catch(err => console.error("Update Error:", err));
   };
 
   const handleDelete = (id) => {

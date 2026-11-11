@@ -5,11 +5,14 @@ import {
   updateShipment,
   deleteShipment
 } from "../services/ShipmentService";
+import { getAllInventory } from "../services/InventoryService.js";
 import "./Shipments.css";
 
 function Shipments() {
 
   const [shipments, setShipments] = useState([]);
+  const [inventory, setInventory] = useState([]);
+  const [shipmentItems, setShipmentItems] = useState([]);
 
   const [formData, setFormData] = useState({
     weight: "",
@@ -27,6 +30,7 @@ function Shipments() {
 
   useEffect(() => {
     loadShipments();
+    loadInventory();
   }, []);
 
   const loadShipments = async () => {
@@ -41,6 +45,29 @@ function Shipments() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadInventory = async () => {
+    try {
+      const response = await getAllInventory();
+      setInventory(Array.isArray(response.data) ? response.data : []);
+    } catch (loadError) {
+      setError("Inventory items could not be loaded. Shipment stock deductions are unavailable until the server connection is restored.");
+    }
+  };
+
+  const addShipmentItem = () => {
+    setShipmentItems(current => [...current, { inventoryId: "", quantity: "1" }]);
+  };
+
+  const updateShipmentItem = (index, field, value) => {
+    setShipmentItems(current => current.map((item, itemIndex) =>
+      itemIndex === index ? { ...item, [field]: value } : item
+    ));
+  };
+
+  const removeShipmentItem = (index) => {
+    setShipmentItems(current => current.filter((_, itemIndex) => itemIndex !== index));
   };
 
   const handleChange = (event) => {
@@ -64,7 +91,11 @@ function Shipments() {
         origin: formData.origin.trim(),
         destination: formData.destination.trim(),
         dispatchDate: formData.dispatchDate,
-        cargoType: formData.cargoType
+        cargoType: formData.cargoType,
+        items: editingShipmentId ? [] : shipmentItems.map(item => ({
+          inventoryId: item.inventoryId,
+          quantity: Number(item.quantity)
+        }))
       };
 
       if (editingShipmentId) {
@@ -90,10 +121,12 @@ function Shipments() {
         dispatchDate: "",
         cargoType: "General Cargo"
       });
+      setShipmentItems([]);
 
       setEditingShipmentId(null);
 
       await loadShipments();
+      if (!editingShipmentId) await loadInventory();
 
     } catch (error) {
 
@@ -101,8 +134,8 @@ function Shipments() {
 
       setError(
           editingShipmentId
-              ? "Could not update shipment."
-              : "Could not create shipment."
+              ? (error.response?.data?.detail || error.response?.data?.message || "Could not update shipment.")
+              : (error.response?.data?.detail || error.response?.data?.message || "Could not create shipment.")
       );
     }
   };
@@ -128,6 +161,7 @@ function Shipments() {
       dispatchDate: shipment.dispatchDate,
       cargoType: shipment.cargoType || "General Cargo"
     });
+    setShipmentItems([]);
 
     setError("");
     setSuccess("");
@@ -282,6 +316,65 @@ function Shipments() {
 
             </div>
 
+            {!editingShipmentId && (
+              <section className="shipment-items-section" aria-labelledby="shipment-items-heading">
+                <div className="shipment-items-heading">
+                  <div>
+                    <h3 id="shipment-items-heading">Inventory items</h3>
+                    <p>Add stock to deduct when this shipment is created. This is optional.</p>
+                  </div>
+                  <button type="button" className="secondary-button" onClick={addShipmentItem}>
+                    Add item
+                  </button>
+                </div>
+                {shipmentItems.map((item, index) => {
+                  const selectedInventory = inventory.find(record => record.inventoryId === item.inventoryId);
+                  return (
+                    <div className="shipment-item-row" key={`shipment-item-${index}`}>
+                      <label>
+                        SKU / item
+                        <select
+                          value={item.inventoryId}
+                          onChange={event => updateShipmentItem(index, "inventoryId", event.target.value)}
+                          required
+                        >
+                          <option value="">Select a SKU</option>
+                          {inventory.map(record => (
+                            <option key={record.inventoryId} value={record.inventoryId}>
+                              {record.sku} - {record.itemName} ({record.quantityAvailable} available)
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>
+                        Quantity
+                        <input
+                          type="number"
+                          min="1"
+                          max={selectedInventory?.quantityAvailable}
+                          step="1"
+                          value={item.quantity}
+                          onChange={event => updateShipmentItem(index, "quantity", event.target.value)}
+                          required
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        className="secondary-button shipment-item-remove"
+                        onClick={() => removeShipmentItem(index)}
+                        aria-label={`Remove item ${index + 1}`}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  );
+                })}
+                {inventory.length === 0 && (
+                  <p className="shipment-item-hint">No inventory records are available to add.</p>
+                )}
+              </section>
+            )}
+
             <div className="form-actions">
 
               <button
@@ -305,6 +398,7 @@ function Shipments() {
                           dispatchDate: "",
                           cargoType: "General Cargo"
                         });
+                        setShipmentItems([]);
 
                         setError("");
                         setSuccess("");
@@ -368,6 +462,7 @@ function Shipments() {
                     <th>Destination</th>
                     <th>Dispatch Date</th>
                     <th>Estimated Delivery</th>
+                    <th>Stock items</th>
                     <th>Actions</th>
                   </tr>
                   </thead>
@@ -405,6 +500,12 @@ function Shipments() {
 
                         <td>
                           {shipment.estimatedDeliveryDate}
+                        </td>
+
+                        <td>
+                          {shipment.items?.length
+                            ? shipment.items.map(item => `${item.sku} x ${item.quantity}`).join(", ")
+                            : "None"}
                         </td>
 
                         <td className="shipment-actions">

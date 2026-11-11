@@ -1,6 +1,9 @@
 package za.ac.cput.logisticmanagementsystem.domain;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Shipment.java
@@ -32,10 +35,9 @@ public class Shipment {
     @Column(nullable = false)
     private String cargoType;
 
-    /*
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "inventory_Id")
-    private Inventory inventory;*/
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "shipment_items", joinColumns = @JoinColumn(name = "shipment_id"))
+    private List<ShipmentItem> items = new ArrayList<>();
 
     protected Shipment(){
     }
@@ -49,8 +51,7 @@ public class Shipment {
         this.dispatchDate = builder.dispatchDate;
         this.estimatedDeliveryDate = builder.estimatedDeliveryDate;
         this.cargoType = builder.cargoType;
-        //this.inventory = builder.inventory;
-
+        this.items = new ArrayList<>(builder.items);
     }
 
     public String getShipmentId() {
@@ -81,10 +82,15 @@ public class Shipment {
         return cargoType;
     }
 
-  /*
-    public Inventory getInventory() {
-        return inventory;
-    }*/
+    @JsonProperty("items")
+    public List<ShipmentItem> getItems() {
+        return items == null ? List.of() : new ArrayList<>(items);
+    }
+
+    @JsonProperty("items")
+    public void setItems(List<ShipmentItem> items) {
+        this.items = items == null ? new ArrayList<>() : new ArrayList<>(items);
+    }
 
     @Override
     public String toString() {
@@ -107,7 +113,7 @@ public class Shipment {
         private LocalDate dispatchDate;
         private LocalDate estimatedDeliveryDate;
         private String cargoType;
-        //private Inventory inventory;
+        private List<ShipmentItem> items = new ArrayList<>();
 
 
         public Builder shipmentId(String shipmentId) {
@@ -139,12 +145,10 @@ public class Shipment {
             this.cargoType = cargoType;
             return this;
         }
-       /*
-        }
-        public Builder inventory(Inventory inventory){
-            this.inventory = inventory;
+        public Builder items(List<ShipmentItem> items) {
+            this.items = items == null ? new ArrayList<>() : new ArrayList<>(items);
             return this;
-        }*/
+        }
         public Shipment build() {
             return new Shipment(this);
         }

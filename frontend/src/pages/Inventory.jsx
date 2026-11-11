@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, ArrowRight, Package, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { AlertCircle, ArrowRight, Download, Package, Pencil, Plus, Search, Trash2, Upload, X } from 'lucide-react';
 import { getAllCompanies } from '../services/CompanyService.js';
 import {
   createInventory,
@@ -7,6 +7,48 @@ import {
   getAllInventory,
   updateInventory,
 } from '../services/InventoryService.js';
+
+const LOW_STOCK_THRESHOLD = 10;
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let value = '';
+  let quoted = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (character === '"') {
+      if (quoted && text[index + 1] === '"') {
+        value += '"';
+        index += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (character === ',' && !quoted) {
+      row.push(value);
+      value = '';
+    } else if ((character === '\n' || character === '\r') && !quoted) {
+      if (character === '\r' && text[index + 1] === '\n') index += 1;
+      row.push(value);
+      if (row.some(cell => cell.trim() !== '')) rows.push(row);
+      row = [];
+      value = '';
+    } else {
+      value += character;
+    }
+  }
+
+  if (quoted) throw new Error('The CSV file contains an unclosed quoted field.');
+  row.push(value);
+  if (row.some(cell => cell.trim() !== '')) rows.push(row);
+  return rows;
+}
+
+function escapeCsv(value) {
+  const text = String(value ?? '');
+  return `"${text.replaceAll('"', '""')}"`;
+}
 
 const emptyForm = {
   itemName: '',
@@ -22,11 +64,15 @@ const Inventory = ({ setActiveTab }) => {
   const [formData, setFormData] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [skuFilter, setSkuFilter] = useState('');
+  const [stockFilter, setStockFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [csvBusy, setCsvBusy] = useState(false);
   const [error, setError] = useState('');
   const [companyError, setCompanyError] = useState('');
   const [message, setMessage] = useState('');
+  const csvInputRef = useRef(null);
 
   useEffect(() => {
     loadInventory();
@@ -63,21 +109,30 @@ const Inventory = ({ setActiveTab }) => {
 
   const filteredInventory = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
+    const skuQuery = skuFilter.trim().toLowerCase();
     return inventory.filter(item =>
-      [
+      ([
         item.itemName,
         item.sku,
         item.companyId,
         companyNames.get(item.companyId),
       ].some(value => String(value ?? '').toLowerCase().includes(query))
+      && String(item.sku ?? '').toLowerCase().includes(skuQuery)
+      && (stockFilter === 'all'
+        || (stockFilter === 'low' && Number(item.quantityAvailable) > 0 && Number(item.quantityAvailable) <= LOW_STOCK_THRESHOLD)
+        || (stockFilter === 'out' && Number(item.quantityAvailable) === 0)))
     );
-  }, [inventory, searchTerm, companyNames]);
+  }, [inventory, searchTerm, skuFilter, stockFilter, companyNames]);
 
   const totalUnits = inventory.reduce(
     (total, item) => total + (Number(item.quantityAvailable) || 0),
     0
   );
-  const lowStockCount = inventory.filter(item => Number(item.quantityAvailable) <= 10).length;
+  const outOfStockItems = inventory.filter(item => Number(item.quantityAvailable) === 0);
+  const lowStockItems = inventory.filter(item =>
+    Number(item.quantityAvailable) > 0 && Number(item.quantityAvailable) <= LOW_STOCK_THRESHOLD
+  );
+  const lowStockCount = outOfStockItems.length + lowStockItems.length;
 
   function resetForm() {
     setFormData(emptyForm);
@@ -151,6 +206,116 @@ const Inventory = ({ setActiveTab }) => {
     }
   }
 
+  function handleExportCsv() {
+    const headers = ['inventoryId', 'itemName', 'sku', 'quantityAvailable', 'unitWeight', 'companyId'];
+    const rows = inventory.map(item => headers.map(header => escapeCsv(item[header])).join(','));
+    const csv = `\uFEFF${headers.join(',')}\r\n${rows.join('\r\n')}`;
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'inventory-stock-audit.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleImportCsv(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setCsvBusy(true);
+    setError('');
+    setMessage('');
+    try {
+      const rows = parseCsv(await file.text());
+      if (rows.length < 2) throw new Error('The CSV must include a header and at least one stock record.');
+
+      const headers = rows[0].map((header, index) =>
+        (index === 0 ? header.replace(/^\uFEFF/, '') : header).trim()
+      );
+      const column = name => headers.indexOf(name);
+      const quantityColumn = column('quantityAvailable') >= 0 ? column('quantityAvailable') : column('quantity');
+      for (const required of ['itemName', 'sku', 'unitWeight']) {
+        if (column(required) < 0) throw new Error(`The CSV is missing the required "${required}" column.`);
+      }
+      if (quantityColumn < 0) throw new Error('The CSV is missing the required "quantityAvailable" column.');
+
+      const existingBySku = new Map(inventory.map(item => [String(item.sku).toLowerCase(), item]));
+      const seenSkus = new Set();
+      const prepared = rows.slice(1).map((cells, index) => {
+        const rowNumber = index + 2;
+        const value = name => {
+          const position = column(name);
+          return position < 0 ? '' : String(cells[position] ?? '').trim();
+        };
+        const itemName = value('itemName');
+        const sku = value('sku');
+        const quantity = Number(cells[quantityColumn]);
+        const unitWeight = Number(value('unitWeight'));
+        const existing = existingBySku.get(sku.toLowerCase());
+        const companyId = value('companyId') || existing?.companyId || '';
+        const existingCompanyId = companies.some(company => company.companyId === companyId);
+
+        if (!itemName || !sku) throw new Error(`Row ${rowNumber}: item name and SKU are required.`);
+        if (seenSkus.has(sku.toLowerCase())) throw new Error(`Row ${rowNumber}: duplicate SKU "${sku}".`);
+        if (!Number.isInteger(quantity) || quantity < 0 || (!existing && quantity === 0)) {
+          throw new Error(`Row ${rowNumber}: quantity must be a whole number${existing ? ' of zero or more' : ' greater than zero'}.`);
+        }
+        if (!Number.isFinite(unitWeight) || unitWeight <= 0) {
+          throw new Error(`Row ${rowNumber}: unit weight must be greater than zero.`);
+        }
+        if (!companyId || !existingCompanyId) {
+          throw new Error(`Row ${rowNumber}: provide a valid companyId for SKU "${sku}".`);
+        }
+        seenSkus.add(sku.toLowerCase());
+        return {
+          rowNumber,
+          existing,
+          item: {
+            ...(existing ? { inventoryId: existing.inventoryId } : {}),
+            itemName,
+            sku,
+            quantityAvailable: quantity,
+            unitWeight,
+            companyId,
+          },
+        };
+      });
+
+      let imported = 0;
+      const failures = [];
+      for (const record of prepared) {
+        try {
+          if (record.existing) {
+            await updateInventory(record.item);
+          } else {
+            await createInventory(record.item);
+          }
+          imported += 1;
+        } catch (importError) {
+          const reason = importError.response?.data?.detail
+            || importError.response?.data?.message
+            || importError.message
+            || 'request failed';
+          failures.push(`row ${record.rowNumber} (${record.item.sku}): ${reason}`);
+        }
+      }
+
+      await loadInventory();
+      if (failures.length) {
+        setError(
+          `Imported ${imported} of ${prepared.length} rows. Could not import: ${failures.slice(0, 5).join(', ')}${failures.length > 5 ? ', ...' : ''}.`
+        );
+      } else {
+        setMessage(`Imported ${imported} stock record${imported === 1 ? '' : 's'} successfully. Existing SKUs were updated.`);
+      }
+    } catch (importError) {
+      setError(importError.message || 'Could not import this CSV file.');
+    } finally {
+      setCsvBusy(false);
+      event.target.value = '';
+    }
+  }
+
   return (
     <div className="space-y-6 p-6 md:p-8">
       <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -203,6 +368,39 @@ const Inventory = ({ setActiveTab }) => {
           <p className="mt-2 text-2xl font-bold text-amber-700">{lowStockCount}</p>
         </div>
       </section>
+
+      {lowStockCount > 0 && (
+        <section className="space-y-3" aria-label="Stock warnings" aria-live="polite">
+          {outOfStockItems.length > 0 && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">{outOfStockItems.length} item{outOfStockItems.length === 1 ? '' : 's'} out of stock</p>
+                  <p className="mt-1 text-sm">{outOfStockItems.slice(0, 4).map(item => `${item.itemName} (${item.sku})`).join(', ')}{outOfStockItems.length > 4 ? ', ...' : ''}</p>
+                </div>
+                <button type="button" onClick={() => setStockFilter('out')} className="shrink-0 text-sm font-semibold underline">
+                  View
+                </button>
+              </div>
+            </div>
+          )}
+          {lowStockItems.length > 0 && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-900">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">{lowStockItems.length} item{lowStockItems.length === 1 ? '' : 's'} at or below {LOW_STOCK_THRESHOLD} units</p>
+                  <p className="mt-1 text-sm">{lowStockItems.slice(0, 4).map(item => `${item.itemName} (${item.sku}): ${item.quantityAvailable} left`).join(', ')}{lowStockItems.length > 4 ? ', ...' : ''}</p>
+                </div>
+                <button type="button" onClick={() => setStockFilter('low')} className="shrink-0 text-sm font-semibold underline">
+                  View
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-3">
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm xl:col-span-1">
@@ -311,18 +509,77 @@ const Inventory = ({ setActiveTab }) => {
         <section className="min-w-0 rounded-lg border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
           <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <h2 className="text-lg font-bold text-lms-textMain">Stock records</h2>
-            <label className="relative block w-full sm:max-w-xs">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-              <input
-                type="search"
-                aria-label="Search inventory"
-                placeholder="Search name, SKU, or company..."
-                value={searchTerm}
-                onChange={event => setSearchTerm(event.target.value)}
-                className="w-full rounded-md border border-slate-300 py-2 pl-9 pr-3 text-sm"
-              />
-            </label>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <label className="relative block w-full sm:w-56">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <input
+                  type="search"
+                  aria-label="Search inventory"
+                  placeholder="Search name or company..."
+                  value={searchTerm}
+                  onChange={event => setSearchTerm(event.target.value)}
+                  className="w-full rounded-md border border-slate-300 py-2 pl-9 pr-3 text-sm"
+                />
+              </label>
+              <label>
+                <span className="sr-only">Filter by SKU</span>
+                <input
+                  type="search"
+                  list="inventory-sku-options"
+                  aria-label="Look up and filter by SKU"
+                  placeholder="Look up SKU..."
+                  value={skuFilter}
+                  onChange={event => setSkuFilter(event.target.value)}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm sm:w-40"
+                />
+                <datalist id="inventory-sku-options">
+                  {inventory.map(item => <option key={item.inventoryId} value={item.sku} />)}
+                </datalist>
+              </label>
+              <label>
+                <span className="sr-only">Filter stock status</span>
+                <select
+                  aria-label="Filter stock status"
+                  value={stockFilter}
+                  onChange={event => setStockFilter(event.target.value)}
+                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm sm:w-36"
+                >
+                  <option value="all">All stock</option>
+                  <option value="low">Low stock</option>
+                  <option value="out">Out of stock</option>
+                </select>
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleExportCsv}
+                  disabled={inventory.length === 0 || csvBusy}
+                  className="inline-flex min-h-10 items-center justify-center gap-1 rounded-md border border-slate-300 px-3 text-sm font-medium text-lms-textMain hover:bg-slate-50 disabled:opacity-50"
+                >
+                  <Download className="h-4 w-4" /> Export CSV
+                </button>
+                <button
+                  type="button"
+                  onClick={() => csvInputRef.current?.click()}
+                  disabled={csvBusy}
+                  className="inline-flex min-h-10 items-center justify-center gap-1 rounded-md border border-slate-300 px-3 text-sm font-medium text-lms-textMain hover:bg-slate-50 disabled:opacity-50"
+                >
+                  <Upload className="h-4 w-4" /> {csvBusy ? 'Importing...' : 'Import CSV'}
+                </button>
+                <input
+                  ref={csvInputRef}
+                  type="file"
+                  accept=".csv,text/csv"
+                  onChange={handleImportCsv}
+                  className="hidden"
+                  aria-label="Import inventory CSV file"
+                />
+              </div>
+            </div>
           </div>
+          <p className="mb-4 text-xs text-lms-textMuted">
+            CSV columns: itemName, sku, quantityAvailable, unitWeight, companyId. Existing SKUs update in place; export includes inventoryId for auditing.
+          </p>
           {loading ? (
             <p className="py-10 text-center text-sm text-lms-textMuted">Loading inventory...</p>
           ) : inventory.length === 0 ? (

@@ -14,10 +14,17 @@
 ## Entity Relationship Diagram (ERD)
 
 ```mermaid
+
+## Inventory and shipment stock
+
+The inventory page flags items with 10 or fewer units, separately calls out zero-stock items, and supports searching and filtering by SKU and stock status. Inventory CSV exports include `inventoryId`, `itemName`, `sku`, `quantityAvailable`, `unitWeight`, and `companyId`. CSV imports require item name, SKU, quantity, and unit weight; provide a valid company ID for new SKUs. Matching SKUs are updated, and new SKUs are created.
+
+Shipment creation can include inventory item IDs and quantities. Stock is checked and deducted transactionally when the shipment is created; a request that exceeds available stock is rejected without creating the shipment or partially deducting stock.mermaid
 erDiagram
     Company ||--|| Inventory : "owns"
     Company ||--|| ShippingContract : "holds"
-    Inventory ||--|| Shipment : "assigned to"
+    Inventory ||--o{ ShipmentItem : "selected for"
+    Shipment ||--|{ ShipmentItem : "contains"
     ShippingContract ||--|| Shipment : "applies to"
     Shipment ||--|| ShipmentTracking : "tracked by"
     Shipment ||--|| Invoice : "generates"
@@ -56,8 +63,14 @@ erDiagram
         String destination
         LocalDate dispatchDate
         LocalDate estimatedDeliveryDate
-        String inventoryId FK
         String contractId FK
+    }
+
+    ShipmentItem {
+        String shipmentId FK
+        String inventoryId FK
+        String sku
+        int quantity
     }
 
     ShipmentTracking {

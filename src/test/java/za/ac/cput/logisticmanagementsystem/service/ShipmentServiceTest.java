@@ -5,7 +5,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
+import za.ac.cput.logisticmanagementsystem.domain.Inventory;
 import za.ac.cput.logisticmanagementsystem.domain.Shipment;
+import za.ac.cput.logisticmanagementsystem.domain.ShipmentItem;
+import za.ac.cput.logisticmanagementsystem.repository.IInventoryRepository;
 import za.ac.cput.logisticmanagementsystem.repository.IShipmentRepository;
 import za.ac.cput.logisticmanagementsystem.service.impl.ShipmentService;
 
@@ -22,6 +26,9 @@ public class ShipmentServiceTest {
     @Mock
     private IShipmentRepository repository;
 
+    @Mock
+    private IInventoryRepository inventoryRepository;
+
     @InjectMocks
     private ShipmentService service;
 
@@ -33,6 +40,7 @@ public class ShipmentServiceTest {
                 .origin("Cape Town")
                 .destination("Johannesburg")
                 .dispatchDate(java.time.LocalDate.now())
+                .cargoType("General Cargo")
                 .estimatedDeliveryDate(java.time.LocalDate.now().plusDays(3))
                 .build();
 
@@ -42,6 +50,7 @@ public class ShipmentServiceTest {
                 .origin("Cape Town")
                 .destination("Johannesburg")
                 .dispatchDate(LocalDate.now())
+                .cargoType("GENERAL CARGO")
                 .estimatedDeliveryDate(LocalDate.now().plusDays(3))
                 .build();
 
@@ -55,6 +64,58 @@ public class ShipmentServiceTest {
         assertEquals("Johannesburg", result.getDestination());
         assertEquals(LocalDate.now(), result.getDispatchDate());
         assertEquals(LocalDate.now().plusDays(3), result.getEstimatedDeliveryDate());
+    }
+
+    @Test
+    void testCreateShipmentDeductsInventoryForItems() {
+        Inventory inventory = new Inventory.Builder()
+                .setInventoryId("INV-1")
+                .setItemName("Packing boxes")
+                .setSku("BOX-01")
+                .setQuantityAvailable(10)
+                .setUnitWeight(1.5)
+                .setCompanyId("COMP-1")
+                .build();
+        Shipment request = shipmentRequest(new ShipmentItem("INV-1", null, 4));
+        when(inventoryRepository.findByIdForUpdate("INV-1")).thenReturn(java.util.Optional.of(inventory));
+        when(repository.save(any(Shipment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(inventoryRepository.save(any(Inventory.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Shipment result = service.create(request);
+
+        assertEquals(1, result.getItems().size());
+        assertEquals("BOX-01", result.getItems().get(0).getSku());
+        assertEquals(4, result.getItems().get(0).getQuantity());
+        verify(inventoryRepository).save(argThat(updated -> updated.getQuantityAvailable() == 6));
+    }
+
+    @Test
+    void testCreateShipmentRejectsQuantityAboveAvailableStock() {
+        Inventory inventory = new Inventory.Builder()
+                .setInventoryId("INV-1")
+                .setItemName("Packing boxes")
+                .setSku("BOX-01")
+                .setQuantityAvailable(2)
+                .setUnitWeight(1.5)
+                .setCompanyId("COMP-1")
+                .build();
+        when(inventoryRepository.findByIdForUpdate("INV-1")).thenReturn(java.util.Optional.of(inventory));
+
+        assertThrows(ResponseStatusException.class,
+                () -> service.create(shipmentRequest(new ShipmentItem("INV-1", null, 3))));
+        verify(repository, never()).save(any(Shipment.class));
+        verify(inventoryRepository, never()).save(any(Inventory.class));
+    }
+
+    private Shipment shipmentRequest(ShipmentItem item) {
+        return new Shipment.Builder()
+                .weight(10)
+                .origin("Cape Town")
+                .destination("Johannesburg")
+                .dispatchDate(LocalDate.now())
+                .cargoType("General Cargo")
+                .items(List.of(item))
+                .build();
     }
 
     @Test
@@ -120,7 +181,7 @@ public class ShipmentServiceTest {
                 .estimatedDeliveryDate(LocalDate.now().plusDays(3))
                 .build();
 
-        when(repository.existsById("SHIP123")).thenReturn(false);
+        when(repository.findById("SHIP123")).thenReturn(java.util.Optional.empty());
 
         Shipment result = service.update(shipment);
         assertNull(result);

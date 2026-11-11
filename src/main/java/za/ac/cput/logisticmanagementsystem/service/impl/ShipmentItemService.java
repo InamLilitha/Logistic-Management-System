@@ -12,7 +12,7 @@ import za.ac.cput.logisticmanagementsystem.domain.ShipmentItem;
 import za.ac.cput.logisticmanagementsystem.factory.ShipmentItemFactory;
 import za.ac.cput.logisticmanagementsystem.repository.IShipmentItemRepository;
 import za.ac.cput.logisticmanagementsystem.repository.IShipmentRepository;
-import za.ac.cput.logisticmanagementsystem.repository.InventoryRepository;
+import za.ac.cput.logisticmanagementsystem.repository.IInventoryRepository;
 import za.ac.cput.logisticmanagementsystem.service.IShipmentItemService;
 
 import java.util.List;
@@ -22,12 +22,12 @@ public class ShipmentItemService implements IShipmentItemService {
 
     private final IShipmentItemRepository repository;
     private final IShipmentRepository shipmentRepository;
-    private final InventoryRepository inventoryRepository;
+    private final IInventoryRepository inventoryRepository;
 
     public ShipmentItemService(
             IShipmentItemRepository repository,
             IShipmentRepository shipmentRepository,
-            InventoryRepository inventoryRepository) {
+            IInventoryRepository inventoryRepository) {
 
         this.repository = repository;
         this.shipmentRepository = shipmentRepository;

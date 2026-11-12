@@ -125,3 +125,83 @@ erDiagram
         datetime completed_at
     }
 ```
+
+## How to Run the Project
+
+### Prerequisites
+
+Install the following software:
+
+- Java 17 or later
+- MySQL 8 or later
+- Node.js and npm
+
+### 1. Configure MySQL
+
+Start MySQL and create the database:
+
+```sql
+CREATE DATABASE logistics;
+```
+
+The backend is configured to connect to `localhost:3306/logistics` using the
+credentials in
+[`src/main/resources/application.properties`](src/main/resources/application.properties).
+Update the datasource username and password in that file to match your local
+MySQL account. Do not commit real passwords or email credentials to the
+repository.
+
+The application uses Hibernate's `update` setting, so the required tables are
+created or updated automatically when the backend starts.
+
+### 2. Start the Backend
+
+From the project root, run:
+
+**Windows:**
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+**macOS/Linux:**
+
+```bash
+./mvnw spring-boot:run
+```
+
+The backend runs at [http://localhost:8080](http://localhost:8080).
+
+To run the backend tests instead:
+
+```powershell
+.\mvnw.cmd test
+```
+
+### 3. Start the Frontend
+
+Open a second terminal and run:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend runs at [http://localhost:5173](http://localhost:5173) and
+communicates with the backend at `http://localhost:8080`.
+
+Open the frontend URL in a browser after both the backend and MySQL are
+running.
+
+### Troubleshooting
+
+- **Database connection failed:** Confirm that MySQL is running, the
+  `logistics` database exists, and the credentials in
+  `application.properties` are correct.
+- **Port already in use:** Stop the process using port `8080` or `5173`, or
+  change the corresponding application configuration.
+- **Frontend dependencies are missing:** Run `npm install` from the
+  `frontend` directory.
+- **Mail features are unavailable:** Set the `MAIL_USERNAME` and corresponding
+  mail credential environment variables before using email functionality.

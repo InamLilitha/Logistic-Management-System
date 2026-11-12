@@ -6,22 +6,37 @@
 
 package za.ac.cput.logisticmanagementsystem.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import java.io.Serializable;
+import jakarta.persistence.Table;
 import java.util.Objects;
 
 @Entity
-public class CompanyDomain implements Serializable{
+@Table(name = "company_domain")
+public class CompanyDomain {
 
-    @Id
-    private String companyId;
-    private String companyName;
-    private String companyType;
-    private String taxId;
-    private String phoneNumber;
-    private String emailAddress;
-    private boolean isActive;
+        @Id
+        @Column(name = "company_id", nullable = false)
+        private String companyId;
+
+        @Column(name ="company_name", nullable = false)
+        private String companyName;
+
+        @Column(name = "company_type", nullable = false)
+        private String companyType;
+
+        @Column(name ="tax_id", nullable = false)
+        private String taxId;
+
+        @Column(name = "phone_number", nullable = false)
+        private String phoneNumber;
+
+        @Column(name = "email_address", nullable = false)
+        private String emailAddress;
+
+        @Column(name = "is_active", nullable = false)
+        private boolean isActive;
 
     protected CompanyDomain() {}
 

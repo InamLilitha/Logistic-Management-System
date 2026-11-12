@@ -120,6 +120,114 @@ erDiagram
     }
 ```
 
+### Implemented JPA Entity Relationships
+
+The diagram below reflects the relationships currently implemented in the
+domain classes. Fields such as `companyId`, `shipmentId`, and `companyId` in
+`Invoice` are represented as scalar values where no JPA relationship is
+currently mapped.
+
+```mermaid
+erDiagram
+    STAFF_PROFILES ||--o{ PASSWORD_RESET_REQUESTS : "has"
+    STAFF_PROFILES ||--o{ SHIPMENT : "creates"
+    COMPANY_DOMAIN ||--o{ INVENTORY : "owns"
+    COMPANY_DOMAIN ||--o{ SHIPMENT : "associated_with"
+    SHIPPING_CONTRACT ||--o{ SHIPMENT : "governs"
+    SHIPMENT ||--o{ SHIPMENT_ITEM : "contains"
+    INVENTORY ||--o{ SHIPMENT_ITEM : "allocated_to"
+    SHIPMENT ||--o| SHIPMENT_TRACKING : "tracked_by"
+
+    COMPANY_DOMAIN {
+        string company_id PK
+        string company_name
+        string company_type
+        string tax_id
+        string phone_number
+        string email_address
+        boolean is_active
+    }
+
+    INVENTORY {
+        string inventory_id PK
+        string item_name
+        string sku
+        int quantity_available
+        double unit_weight
+        string company_id FK
+    }
+
+    SHIPPING_CONTRACT {
+        string contract_id PK
+        string contract_number
+        double price_per_kg
+        date contract_start_date
+        date contract_expiry_date
+    }
+
+    SHIPMENT {
+        string shipment_id PK
+        double weight
+        string origin
+        string destination
+        date dispatch_date
+        date estimated_delivery_date
+        string cargo_type
+        string company_id FK
+        string contract_id FK
+        bigint created_by_staff_id FK
+    }
+
+    SHIPMENT_ITEM {
+        string shipment_item_id PK
+        string shipment_id FK
+        string inventory_id FK
+        int quantity_shipped
+    }
+
+    SHIPMENT_TRACKING {
+        string tracking_id PK
+        string tracking_number
+        string current_location
+        string shipment_status
+        date date_created
+        string shipment_id FK
+    }
+
+    INVOICE {
+        string invoice_id PK
+        string shipment_id
+        string company_id
+        string customer_name
+        string description
+        double total_amount
+        string payment_status
+        datetime date_issued
+        datetime due_date
+    }
+
+    STAFF_PROFILES {
+        bigint id PK
+        string username UK
+        string email UK
+        string name
+        string password_hash
+        string role
+        boolean active
+    }
+
+    PASSWORD_RESET_REQUESTS {
+        bigint id PK
+        bigint staff_profile_id FK
+        uuid token UK
+        string status
+        datetime created_at
+        datetime expires_at
+        datetime reviewed_at
+        datetime completed_at
+    }
+```
+
 ## Inventory and Shipment Stock
 
 The inventory page flags items with 10 or fewer units, separately calls out

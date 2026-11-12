@@ -8,8 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import za.ac.cput.logisticmanagementsystem.domain.ShippingContract;
 import za.ac.cput.logisticmanagementsystem.factory.ShippingContractFactory;
 import za.ac.cput.logisticmanagementsystem.service.ShippingContractService;
-import za.ac.cput.logisticmanagementsystem.controller.ShippingContractController;
-
 import java.time.LocalDate;
 import java.util.List;
 

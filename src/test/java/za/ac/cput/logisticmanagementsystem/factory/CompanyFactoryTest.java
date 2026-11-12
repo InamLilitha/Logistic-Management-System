@@ -16,7 +16,7 @@ public class CompanyFactoryTest {
     @Test
     void testCreateCompanySuccess(){
         CompanyDomain companyDomain = CompanyFactory.createCompanyDomain("Checkers",
-                "TAX-45671", "0210001234","checkers@gmail.co.za");
+                "Retail", "TAX-45671", "0210001234","checkers@gmail.co.za");
         assertNotNull(companyDomain);
         assertNotNull(companyDomain.getCompanyId());
         assertEquals("Checkers", companyDomain.getCompanyName());
@@ -26,14 +26,14 @@ public class CompanyFactoryTest {
     @Test
     void testCreateCompanyWithInvalidEmail(){
         CompanyDomain companyDomain = CompanyFactory.createCompanyDomain("Checkers",
-                "TAX-45671", "0210001234","wrong-email-format");
+                "Retail", "TAX-45671", "0210001234","wrong-email-format");
         assertNull(companyDomain);
     }
 
     @Test
     void testCreateCompanyWithInvalidPhoneNumber(){
         CompanyDomain companyDomain = CompanyFactory.createCompanyDomain("Checkers",
-                "TAX-45671", "1234","checkers@gmail.co.za");
+                "Retail", "TAX-45671", "1234","checkers@gmail.co.za");
         assertNull(companyDomain);
     }
 

@@ -10,8 +10,6 @@ import za.ac.cput.logisticmanagementsystem.domain.StaffProfile;
 import za.ac.cput.logisticmanagementsystem.repository.PasswordResetRequestRepository;
 import za.ac.cput.logisticmanagementsystem.repository.StaffProfileRepository;
 import za.ac.cput.logisticmanagementsystem.service.IPasswordResetRequestService;
-import za.ac.cput.logisticmanagementsystem.service.impl.EmailService;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;

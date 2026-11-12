@@ -7,7 +7,6 @@ import za.ac.cput.logisticmanagementsystem.domain.Shipment;
 import za.ac.cput.logisticmanagementsystem.domain.ShippingContract;
 import za.ac.cput.logisticmanagementsystem.repository.IInvoiceRepository;
 import za.ac.cput.logisticmanagementsystem.repository.IShipmentRepository;
-import za.ac.cput.logisticmanagementsystem.repository.ShippingContractRepository;
 
 import java.util.Date;
 import java.util.List;
@@ -25,15 +24,12 @@ public class InvoiceService implements IInvoiceService {
 
     private final IInvoiceRepository invoiceRepository;
     private final IShipmentRepository shipmentRepository;
-    private final ShippingContractRepository contractRepository;
 
     @Autowired
     public InvoiceService(IInvoiceRepository invoiceRepository,
-                          IShipmentRepository shipmentRepository,
-                          ShippingContractRepository contractRepository) {
+                          IShipmentRepository shipmentRepository) {
         this.invoiceRepository  = invoiceRepository;
         this.shipmentRepository = shipmentRepository;
-        this.contractRepository = contractRepository;
     }
 
     @Override

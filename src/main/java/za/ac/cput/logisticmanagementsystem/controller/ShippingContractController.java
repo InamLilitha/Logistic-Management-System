@@ -1,6 +1,5 @@
 package za.ac.cput.logisticmanagementsystem.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import za.ac.cput.logisticmanagementsystem.domain.ShippingContract;
 import za.ac.cput.logisticmanagementsystem.service.ShippingContractService;

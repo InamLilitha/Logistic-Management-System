@@ -33,7 +33,7 @@ public class Invoice implements Serializable {
     public String customerName;
     public String description;
 
-    @Column(name = "total_amount")
+    @Column(name = "total_amount", nullable = true)
     public double total;
 
     public String paymentStatus;

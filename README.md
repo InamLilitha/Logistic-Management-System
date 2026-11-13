@@ -283,8 +283,6 @@ These are development/demo credentials only:
 | Administrator | `admin` | `admin123` | ADMIN |
 | Demonstration user | `demo` | `demo123` | STAFF |
 
-Change these passwords before using the system outside a classroom or local
-demonstration environment.
 
 ### 2. Start the Backend
 

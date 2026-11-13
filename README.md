@@ -1,14 +1,15 @@
 # ADP Capstone Project
 ### Applications Development Practice 3 — Assignment 1
+## Group SD1
 
 ## Team Members
 | Name | Student Number | Role/Focus |
 | :--- | :--- | :--- |
-| Siphamandla | 240256891 | |
-| Ryan Paledi | 230969429 | |
-| Maghdie Petersen | 230600204 | |
-| Simphiwe | 221549323 | |
-| Inam Ngqokomashe | 222660155 | |
+| Siphamandla Nkosi | 240256891 | Inventory |
+| Ryan Paledi | 230969429 | Shipment Tracking |
+| Maghdie Petersen | 230600204 | Companies |
+| Simphiwe Nkosi | 221549323 | Contact |
+| Inam Ngqokomashe | 222660155 | Shipment |
 | Tebogo Pii | 230226442 | Invoice |
 
 ## Entity Relationship Diagram (ERD)

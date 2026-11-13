@@ -96,7 +96,7 @@ const LmsLayout = ({
                     </div>
 
                     <div className="lms-brand-copy">
-                        <h1>ModuFlow</h1>
+                        <h1>Logistics Management System</h1>
                         <span>LOGISTICS MANAGEMENT</span>
                     </div>
 
@@ -269,8 +269,7 @@ const LmsLayout = ({
 
                 <footer className="lms-footer">
                     <span>
-                        <strong>ModuFlow</strong> · Logistics Management
-                        System
+                        <strong>Logistics Management System</strong>
                     </span>
 
                     <span>Built for smoother operations.</span>
@@ -281,4 +280,3 @@ const LmsLayout = ({
 };
 
 export default LmsLayout;
-

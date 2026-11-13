@@ -1284,7 +1284,7 @@ tbody tr:last-child td {
 }
 
      /* ==========================================
-        MODUFLOW VISUAL REFINEMENT
+        LOGISTIC MANAGEMENT SYSTEM VISUAL REFINEMENT
         Append to the bottom of index.css
      ========================================== */
 
@@ -1352,20 +1352,16 @@ tbody tr:last-child td {
   width: 45px;
   height: 45px;
 
-  background: linear-gradient(
-          145deg,
-          #20c7b1,
-          #3478f6
-  );
+  background: #3478f6;
 
-  border-radius: 14px;
-  box-shadow: 0 6px 18px rgb(24 182 164 / 20%);
+  border-radius: 8px;
+  box-shadow: none;
 }
 
 .lms-brand-copy h1 {
-  font-size: 19px;
+  font-size: 15px;
   font-weight: 800;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.2px;
 }
 
 .lms-brand-copy > span {
@@ -1853,4 +1849,3 @@ tbody tr:hover {
     padding: 15px;
   }
 }
-

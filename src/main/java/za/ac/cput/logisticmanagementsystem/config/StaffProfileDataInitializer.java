@@ -3,6 +3,7 @@ package za.ac.cput.logisticmanagementsystem.config;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import za.ac.cput.logisticmanagementsystem.domain.StaffProfile;
@@ -12,6 +13,7 @@ import za.ac.cput.logisticmanagementsystem.repository.StaffProfileRepository;
 public class StaffProfileDataInitializer {
 
     @Bean
+    @Order(1)
     CommandLineRunner seedDefaultAdmin(StaffProfileRepository repository, PasswordEncoder passwordEncoder) {
         return args -> {
             if (!repository.existsByUsername("admin")) {
@@ -21,6 +23,15 @@ public class StaffProfileDataInitializer {
                         "System Administrator",
                         passwordEncoder.encode("admin123"),
                         "ADMIN"
+                ));
+            }
+            if (!repository.existsByUsername("demo")) {
+                repository.save(new StaffProfile(
+                        "demo",
+                        "demo@lms.com",
+                        "Demo Lecturer",
+                        passwordEncoder.encode("demo123"),
+                        "STAFF"
                 ));
             }
         };
